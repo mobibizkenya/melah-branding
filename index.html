@@ -759,9 +759,10 @@ function toast(msg, kind=''){
 /* ============================================================
    SUBSCRIPTION & M-PESA PAYMENTS
    ------------------------------------------------------------
-   UNIFIED ENDPOINTS — must match MOBIBIZ backend exactly:
-     POST {apiBase}/api/stkpush
-     GET  {apiBase}/api/stkpush/status?checkoutRequestId=...
+   Unified backend contract:
+     POST {apiBase}/api/mpesa/stkpush
+     Backend handles the M-Pesa callback and writes to Firestore.
+     Frontend only polls Firestore for activation.
    ============================================================ */
 const SUB_CONFIG = {
   amount:         1500,
@@ -771,10 +772,10 @@ const SUB_CONFIG = {
   supportPhone:   '+254 112 238 665',
   supportEmail:   'support@melah.co.ke',
   currency:       'KES',
-  apiBase:        '', // leave '' for same-origin; or set 'https://melah-api.onrender.com'
+  orgId:          'melah-branding',
+  apiBase:        '',
   endpoints: {
-    stkPush:   '/api/stkpush',
-    stkStatus: '/api/stkpush/status'
+    stkPush: '/api/mpesa/stkpush'
   },
   pollInterval: 3500,
   pollTimeout:  120000
@@ -862,7 +863,7 @@ function normalizePhone(input){
   return p;
 }
 
-/* ---------- pending payments (recover after reload) ---------- */
+/* ---------- pending payments ---------- */
 function savePendingPayment(checkoutId, phone){
   try {
     const list = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
@@ -882,17 +883,13 @@ async function resumePendingPayments(){
   let list = [];
   try { list = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); } catch(e){}
   if (!list.length) return;
+  // Backend writes settings/main.subscriptionExpiry on success;
+  // the onSnapshot listener picks it up automatically.
+  // Here we only clean stale entries older than 24h.
   for (const p of list){
-    if (Date.now() - p.at > 86400000){ clearPendingPayment(p.checkoutId); continue; }
-    try {
-      const r = await checkStkStatus(p.checkoutId);
-      if (r.status === 'success'){
-        await activateSubscription(r.receipt || p.checkoutId, p.phone, r.amount);
-        clearPendingPayment(p.checkoutId);
-      } else if (r.status === 'failed'){
-        clearPendingPayment(p.checkoutId);
-      }
-    } catch(e){ /* retry next time */ }
+    if (Date.now() - p.at > 86400000){
+      clearPendingPayment(p.checkoutId);
+    }
   }
 }
 
@@ -903,72 +900,18 @@ async function apiStkPush(phone){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       phone,
-      amount: SUB_CONFIG.amount,
+      amount:           SUB_CONFIG.amount,
+      orgId:            SUB_CONFIG.orgId,
       accountReference: 'MELAH-POS',
-      transactionDesc: 'Melah Branding POS subscription (30 days)',
-      storeNumber: SUB_CONFIG.storeNumber,
-      tillNumber: SUB_CONFIG.tillNumber
+      transactionDesc:  'Melah Branding POS subscription (30 days)',
+      storeNumber:      SUB_CONFIG.storeNumber,
+      tillNumber:       SUB_CONFIG.tillNumber
     })
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || data.errorMessage || ('Payment request failed (' + res.status + ')'));
+  if (!res.ok) throw new Error(data.message || data.error || data.errorMessage || ('Payment request failed (' + res.status + ')'));
   if (data.success === false) throw new Error(data.message || 'Payment request rejected');
   return data;
-}
-
-async function checkStkStatus(checkoutId){
-  const url = subUrl(SUB_CONFIG.endpoints.stkStatus) + '?checkoutRequestId=' + encodeURIComponent(checkoutId);
-  const res = await fetch(url);
-  const data = await res.json().catch(() => ({}));
-  const raw = String(data.status || '').toLowerCase();
-  if (raw === 'success' || data.ResultCode === 0 || data.ResultCode === '0' || data.success === true){
-    return {
-      status: 'success',
-      receipt: data.mpesaReceipt || data.MpesaReceiptNumber || data.receipt || checkoutId,
-      amount: data.amount
-    };
-  }
-  if (raw === 'failed' || raw === 'cancelled' || raw === 'canceled' || raw === 'error'){
-    return { status: 'failed', message: data.message || data.ResultDesc || 'Payment was not completed' };
-  }
-  return { status: 'pending' };
-}
-
-async function pollStkStatus(checkoutId){
-  const start = Date.now();
-  while (Date.now() - start < SUB_CONFIG.pollTimeout){
-    await new Promise(r => setTimeout(r, SUB_CONFIG.pollInterval));
-    try {
-      const r = await checkStkStatus(checkoutId);
-      if (r.status !== 'pending') return r;
-    } catch(err){ console.warn('poll', err); }
-  }
-  return { status: 'pending' };
-}
-
-/* ---------- activation ---------- */
-async function activateSubscription(receipt, phone, amount){
-  const s = db.settings || {};
-  const now = new Date();
-  const currentExpiry = s.subscriptionExpiry ? new Date(s.subscriptionExpiry) : null;
-  const base = currentExpiry && currentExpiry > now ? currentExpiry : now;
-  const newExpiry = new Date(base.getTime() + SUB_CONFIG.days * 86400000);
-  const payments = [...(s.subscriptionPayments || []), {
-    receipt, phone, amount: Number(amount) || SUB_CONFIG.amount,
-    at: now.toISOString(), method: 'M-Pesa'
-  }].slice(-50);
-  const patch = {
-    subscriptionExpiry: newExpiry.toISOString(),
-    subscriptionLastPayment: now.toISOString(),
-    subscriptionPayments: payments
-  };
-  try {
-    await fsSaveSettings(patch);
-  } catch(err){ console.error('activateSubscription', err); }
-  db.settings = { ...db.settings, ...patch };
-  updateSubscriptionGate();
-  if (currentView === 'settings') renderSubPanel();
-  toast('Subscription renewed until ' + newExpiry.toLocaleDateString('en-GB'), 'ok');
 }
 
 /* ---------- payment flow ---------- */
@@ -986,27 +929,51 @@ async function startMpesaPayment({ phoneInputId, statusId, button, onSuccess }){
   try {
     localStorage.setItem(LAST_PHONE_KEY, phone);
     const data = await apiStkPush(phone);
-    const checkoutId = data.checkoutRequestId || data.CheckoutRequestID || data.id;
-    if (!checkoutId) throw new Error(data.message || 'Payment gateway did not return a checkout ID');
+    const checkoutId =
+      data.checkoutRequestId || data.CheckoutRequestID ||
+      data.data?.CheckoutRequestID || data.id;
+    if (!checkoutId) throw new Error('Payment gateway did not return a checkout ID');
+
     savePendingPayment(checkoutId, phone);
-    button.textContent = 'Waiting for PIN…';
-    if (statusEl) statusEl.innerHTML = '📱 <b>Check your phone</b> — enter your M-Pesa PIN to authorize KES 1,500.';
-    const result = await pollStkStatus(checkoutId);
-    if (result.status === 'success'){
-      await activateSubscription(result.receipt || checkoutId, phone, result.amount);
-      clearPendingPayment(checkoutId);
-      if (statusEl) statusEl.innerHTML = '✅ <b>Payment received.</b> Thank you!';
-      button.disabled = false;
-      button.textContent = original;
-      if (onSuccess) setTimeout(onSuccess, 700);
-    } else if (result.status === 'failed'){
-      clearPendingPayment(checkoutId);
-      throw new Error(result.message || 'Payment failed or was cancelled');
-    } else {
-      if (statusEl) statusEl.innerHTML = '⏱ Still waiting for confirmation. If you already paid, it will be applied automatically — reopen the app to check.';
-      button.disabled = false;
-      button.textContent = original;
-    }
+    button.textContent = 'Waiting for payment…';
+    if (statusEl) statusEl.innerHTML =
+      '📱 <b>Check your phone</b> — enter your M-Pesa PIN to authorize KES 1,500.<br>' +
+      '<small>Activation happens automatically once the payment is confirmed.</small>';
+
+    // Poll Firestore directly — backend writes settings/main.subscriptionExpiry on success
+    const start = Date.now();
+    const poll = setInterval(async () => {
+      try {
+        const snap = await getDoc(doc(fdb, 'settings', 'main'));
+        if (snap.exists()){
+          db.settings = { ...defaultSettings(), ...snap.data() };
+          const st = getSubState();
+          if (st.status === 'active'){
+            clearInterval(poll);
+            clearPendingPayment(checkoutId);
+            updateSubscriptionGate();
+            if (currentView === 'settings') renderSubPanel();
+            if (statusEl) statusEl.innerHTML = '✅ <b>Payment received.</b> Thank you!';
+            button.disabled = false;
+            button.textContent = original;
+            toast('Subscription renewed until ' +
+              st.expiry.toLocaleDateString('en-GB'), 'ok');
+            if (onSuccess) setTimeout(onSuccess, 700);
+            return;
+          }
+        }
+      } catch(e){ /* retry on next tick */ }
+
+      if (Date.now() - start > SUB_CONFIG.pollTimeout){
+        clearInterval(poll);
+        if (statusEl) statusEl.innerHTML =
+          '⏱ Still waiting for confirmation. If you already paid, refresh the page — ' +
+          'the subscription activates automatically.';
+        button.disabled = false;
+        button.textContent = original;
+      }
+    }, SUB_CONFIG.pollInterval);
+
   } catch(err){
     console.error(err);
     toast(err.message || 'Payment failed', 'err');
@@ -1091,7 +1058,7 @@ async function submitPaymentCode(){
   try {
     await setDoc(doc(fdb, 'paymentRequests', uid()), {
       code:         code.trim(),
-      orgId:        'melah-branding',
+      orgId:        SUB_CONFIG.orgId,
       uid:          session?.uid || session?.id || null,
       name:         session?.name || '',
       email:        session?.email || '',
