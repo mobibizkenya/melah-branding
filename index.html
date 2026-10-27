@@ -638,18 +638,28 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     <div class="brand-mark" id="paywallMark"></div>
     <h2>Subscription Required</h2>
     <p class="sub" id="paywallMsg">Your 30-day subscription has ended. Renew for KES 1,500 to keep using Melah Branding POS.</p>
+
     <div class="paywall-info">
       <div><b>Amount</b><span>KES 1,500</span></div>
       <div><b>Duration</b><span>30 days</span></div>
       <div><b>Till Number</b><span>1816752</span></div>
-      <div><b>Store No.</b><span>1347027</span></div>
+      <div><b>Support</b><span>+254 112 238 665</span></div>
     </div>
+
     <label>M-Pesa Phone Number
       <input id="payPhone" type="tel" inputmode="tel" placeholder="07XX XXX XXX" autocomplete="tel">
     </label>
     <button class="btn lg" id="payBtn" type="button">Pay KES 1,500 via M-Pesa</button>
+    <button class="btn ghost" id="payClaimBtn" type="button" style="width:100%;margin-top:.55rem">
+      I have paid — submit code
+    </button>
     <p class="pay-status" id="payStatus"></p>
-    <p class="paywall-foot">You'll get an STK prompt on your phone. Enter your M-Pesa PIN to confirm.<br><button type="button" id="paywallSignOut">Sign out</button></p>
+    <p class="paywall-foot">
+      You'll get an STK prompt on your phone. Enter your M-Pesa PIN to confirm.<br>
+      Paid manually to the Till? Tap <b>Submit code</b> above.<br>
+      Support: <b>+254 112 238 665</b><br>
+      <button type="button" id="paywallSignOut">Sign out</button>
+    </p>
   </div>
 </div>
 
@@ -714,12 +724,7 @@ function defaultSettings(){
   return {
     businessName:'Melah Branding', phone:'', email:'', address:'',
     currency:'KES', logo:null, theme:'light',
-    defaultRange:'today', includeCredit:'yes', receiptNote:'Thank you for your business!',
-    // Subscription fields — populated from subscription/main (server-owned).
-    subscriptionStart: null,
-    subscriptionExpiry: null,
-    subscriptionPayments: [],
-    subscriptionLastPayment: null
+    defaultRange:'today', includeCredit:'yes', receiptNote:'Thank you for your business!'
   };
 }
 
@@ -754,44 +759,25 @@ function toast(msg, kind=''){
 /* ============================================================
    SUBSCRIPTION & M-PESA PAYMENTS
    ------------------------------------------------------------
-   BACKEND CONTRACT (your own API files):
-
-   1) POST  {apiBase}/api/mpesa/stkpush
-      Body JSON: { phone, amount, accountReference, transactionDesc, storeNumber, tillNumber }
-        phone          -> normalised "2547XXXXXXXX"
-        amount         -> 1500
-        storeNumber    -> 1347027
-        tillNumber     -> 1816752   (use this as PartyB / BusinessShortCode)
-      Success JSON:  { success:true,  checkoutRequestId:"ws_CO_..." }
-      Failure JSON:  { success:false, message:"..." }
-
-   2) GET   {apiBase}/api/mpesa/callback?checkoutRequestId=ws_CO_...
-      (same file as the Safaricom POST callback — dispatches on method)
-      Response JSON: { status:"pending"|"success"|"failed",
-                       mpesaReceipt:"SJ61...",   // when success
-                       amount:1500 }             // when success
-
-   3) GET   {apiBase}/api/mpesa/callback?action=init
-      Creates subscription/main with a 30-day trial if it doesn't
-      exist yet. Called once on app load.
-
-   IMPORTANT: subscription expiry is written ONLY by the server
-   inside api/mpesa/callback.js. The browser never writes it.
+   UNIFIED ENDPOINTS — must match MOBIBIZ backend exactly:
+     POST {apiBase}/api/stkpush
+     GET  {apiBase}/api/stkpush/status?checkoutRequestId=...
    ============================================================ */
 const SUB_CONFIG = {
-  amount: 1500,
-  days: 30,
-  storeNumber: '1347027',
-  tillNumber: '1816752',
-  currency: 'KES',
-  apiBase: '', // e.g. 'https://melah-api.onrender.com' — leave '' for same origin
+  amount:         1500,
+  days:           30,
+  storeNumber:    '1347027',
+  tillNumber:     '1816752',
+  supportPhone:   '+254 112 238 665',
+  supportEmail:   'support@melah.co.ke',
+  currency:       'KES',
+  apiBase:        '', // leave '' for same-origin; or set 'https://melah-api.onrender.com'
   endpoints: {
-    stkPush:   '/api/mpesa/stkpush',
-    stkStatus: '/api/mpesa/callback',
-    initTrial: '/api/mpesa/callback'
+    stkPush:   '/api/stkpush',
+    stkStatus: '/api/stkpush/status'
   },
   pollInterval: 3500,
-  pollTimeout: 120000
+  pollTimeout:  120000
 };
 const subUrl = (path) => (SUB_CONFIG.apiBase || '') + path;
 const LAST_PHONE_KEY = 'melah_last_phone';
@@ -809,30 +795,17 @@ function getSubState(){
 }
 
 async function ensureSubscription(){
-  // The server owns subscription/main and starts the 30-day trial on
-  // the first GET ?action=init. The browser NEVER writes subscription
-  // data — it only reads it (via getDoc here + the onSnapshot listener).
+  if (db.settings.subscriptionStart && db.settings.subscriptionExpiry) return;
+  const now = new Date();
+  const expiry = new Date(now.getTime() + SUB_CONFIG.days * 86400000);
+  const patch = {
+    subscriptionStart: now.toISOString(),
+    subscriptionExpiry: expiry.toISOString()
+  };
   try {
-    const res = await fetch(subUrl(SUB_CONFIG.endpoints.initTrial) + '?action=init');
-    if (!res.ok) throw new Error('init http ' + res.status);
-    const snap = await getDoc(doc(fdb, 'subscription', 'main'));
-    if (snap.exists()){
-      const sub = snap.data();
-      db.settings.subscriptionStart = sub.subscriptionStart || null;
-      db.settings.subscriptionExpiry = sub.subscriptionExpiry || null;
-      db.settings.subscriptionPayments = sub.subscriptionPayments || [];
-      db.settings.subscriptionLastPayment = sub.subscriptionLastPayment || null;
-    } else {
-      // Server didn't create it — fail closed so the paywall shows.
-      db.settings.subscriptionExpiry = '1970-01-01T00:00:00.000Z';
-    }
-  } catch(err){
-    console.warn('ensureSubscription failed', err);
-    // Server unreachable — fail closed (force paywall).
-    if (!db.settings.subscriptionExpiry) {
-      db.settings.subscriptionExpiry = '1970-01-01T00:00:00.000Z';
-    }
-  }
+    await fsSaveSettings(patch);
+    db.settings = { ...db.settings, ...patch };
+  } catch(err){ console.error('ensureSubscription', err); }
 }
 
 function updateSubChip(){
@@ -861,7 +834,7 @@ function updateSubscriptionGate(){
   const paywall = $('#paywall');
   if (!paywall) return;
   if (st.status === 'active'){ paywall.classList.add('hidden'); return; }
-  if (st.status === 'none') return; // not initialised yet
+  if (st.status === 'none') return;
   showPaywall(st);
 }
 
@@ -975,27 +948,27 @@ async function pollStkStatus(checkoutId){
 
 /* ---------- activation ---------- */
 async function activateSubscription(receipt, phone, amount){
-  // The server already wrote subscription/main inside callback.js when
-  // Safaricom confirmed the payment. This just refreshes local state.
+  const s = db.settings || {};
+  const now = new Date();
+  const currentExpiry = s.subscriptionExpiry ? new Date(s.subscriptionExpiry) : null;
+  const base = currentExpiry && currentExpiry > now ? currentExpiry : now;
+  const newExpiry = new Date(base.getTime() + SUB_CONFIG.days * 86400000);
+  const payments = [...(s.subscriptionPayments || []), {
+    receipt, phone, amount: Number(amount) || SUB_CONFIG.amount,
+    at: now.toISOString(), method: 'M-Pesa'
+  }].slice(-50);
+  const patch = {
+    subscriptionExpiry: newExpiry.toISOString(),
+    subscriptionLastPayment: now.toISOString(),
+    subscriptionPayments: payments
+  };
   try {
-    const snap = await getDoc(doc(fdb, 'subscription', 'main'));
-    if (snap.exists()){
-      const sub = snap.data();
-      db.settings.subscriptionStart = sub.subscriptionStart || null;
-      db.settings.subscriptionExpiry = sub.subscriptionExpiry || null;
-      db.settings.subscriptionPayments = sub.subscriptionPayments || [];
-      db.settings.subscriptionLastPayment = sub.subscriptionLastPayment || null;
-      updateSubscriptionGate();
-      if (currentView === 'settings') renderSubPanel();
-      const exp = sub.subscriptionExpiry ? new Date(sub.subscriptionExpiry) : null;
-      toast('Payment received — active until ' + (exp ? exp.toLocaleDateString('en-GB') : '—'), 'ok');
-    } else {
-      toast('Payment received — refreshing…', 'ok');
-    }
-  } catch(err){
-    console.warn('activateSubscription', err);
-    toast('Payment received — refreshing…', 'ok');
-  }
+    await fsSaveSettings(patch);
+  } catch(err){ console.error('activateSubscription', err); }
+  db.settings = { ...db.settings, ...patch };
+  updateSubscriptionGate();
+  if (currentView === 'settings') renderSubPanel();
+  toast('Subscription renewed until ' + newExpiry.toLocaleDateString('en-GB'), 'ok');
 }
 
 /* ---------- payment flow ---------- */
@@ -1059,12 +1032,13 @@ function renderSubPanel(){
     <div class="sub-summary">
       <div><b>Status</b><span>${st.status === 'active' ? st.daysLeft + ' days left' : (st.status === 'expired' ? 'Expired' : 'Pending')}</span></div>
       <div><b>Plan</b><span>KES 1,500 / 30 days</span></div>
-      <div><b>Till No.</b><span>1816752</span></div>
-      <div><b>Store No.</b><span>1347027</span></div>
+      <div><b>Till No.</b><span>${SUB_CONFIG.tillNumber}</span></div>
+      <div><b>Support</b><span>${SUB_CONFIG.supportPhone}</span></div>
     </div>
     <p class="muted" style="font-size:.82rem;margin:.6rem 0 1rem">${statusLine}</p>
     <div class="toolbar" style="margin:0">
       <button class="btn" id="renewBtn" type="button">Renew — Pay KES 1,500</button>
+      <button class="btn ghost" id="claimBtn" type="button">I have paid — submit code</button>
     </div>
     <div class="sec-title" style="margin-top:1rem">Payment History</div>
     <div class="table-wrap sub-history"><table>
@@ -1077,9 +1051,11 @@ function renderSubPanel(){
           <td class="num">${numFmt(p.amount)}</td>
         </tr>`).join('') : `<tr><td colspan="4" class="empty">No payments yet.</td></tr>` }</tbody>
     </table></div>
-    <p class="muted" style="font-size:.74rem;margin-top:.7rem">Payments are charged via M-Pesa STK push. After the payment is confirmed, 30 days are added to your subscription automatically.</p>
+    <p class="muted" style="font-size:.74rem;margin-top:.7rem">Payments are charged via M-Pesa STK push to Till <b>${SUB_CONFIG.tillNumber}</b>. After the payment is confirmed, 30 days are added to your subscription automatically. Support: <b>${SUB_CONFIG.supportPhone}</b>.</p>
   `;
   $('#renewBtn').addEventListener('click', openRenewModal);
+  const cb = $('#claimBtn');
+  if (cb) cb.addEventListener('click', submitPaymentCode);
 }
 
 function openRenewModal(){
@@ -1089,8 +1065,8 @@ function openRenewModal(){
     <div class="sub-summary">
       <div><b>Amount</b><span>KES 1,500</span></div>
       <div><b>Duration</b><span>30 days</span></div>
-      <div><b>Till No.</b><span>1816752</span></div>
-      <div><b>Store No.</b><span>1347027</span></div>
+      <div><b>Till No.</b><span>${SUB_CONFIG.tillNumber}</span></div>
+      <div><b>Support</b><span>${SUB_CONFIG.supportPhone}</span></div>
     </div>
     <p class="muted" style="font-size:.8rem;margin:.3rem 0 .2rem">Current: <b>${st.status === 'active' ? st.daysLeft + ' days left' : (st.status === 'expired' ? 'Expired' : 'Pending')}</b></p>
     <label style="margin-top:.4rem">M-Pesa Phone Number
@@ -1106,6 +1082,30 @@ function openRenewModal(){
     button: saveBtn,
     onSuccess: () => closeModal()
   });
+}
+
+/* ---------- manual payment-code submission ---------- */
+async function submitPaymentCode(){
+  const code = prompt('Enter your M-Pesa confirmation code (e.g. SJ61ABCDEF):');
+  if (!code || !code.trim()) return;
+  try {
+    await setDoc(doc(fdb, 'paymentRequests', uid()), {
+      code:         code.trim(),
+      orgId:        'melah-branding',
+      uid:          session?.uid || session?.id || null,
+      name:         session?.name || '',
+      email:        session?.email || '',
+      amount:       SUB_CONFIG.amount,
+      currency:     SUB_CONFIG.currency,
+      tillNumber:   SUB_CONFIG.tillNumber,
+      storeNumber:  SUB_CONFIG.storeNumber,
+      status:       'pending',
+      createdAt:    Date.now()
+    });
+    toast('Payment submitted — you will be reactivated shortly', 'ok');
+  } catch (err){
+    toast(err.message || 'Could not submit payment', 'err');
+  }
 }
 
 /* ---------- branding ---------- */
@@ -1199,39 +1199,13 @@ function setupListeners(){
 
   unsubscribers.push(onSnapshot(doc(fdb, 'settings', 'main'), snap => {
     if (snap.exists()){
-      // Preserve subscription fields — they live in subscription/main,
-      // not in settings/main, so a naive spread would wipe them.
-      const preserved = {
-        subscriptionStart: db.settings.subscriptionStart,
-        subscriptionExpiry: db.settings.subscriptionExpiry,
-        subscriptionPayments: db.settings.subscriptionPayments,
-        subscriptionLastPayment: db.settings.subscriptionLastPayment
-      };
-      db.settings = { ...defaultSettings(), ...snap.data(), ...preserved };
+      db.settings = { ...defaultSettings(), ...snap.data() };
       applyTheme(db.settings.theme || 'light');
       paintBrandMarks();
       updateSubscriptionGate();
     }
     scheduleRender();
   }, err => console.error('settings listener', err)));
-
-  // Server-owned subscription state — read-only on the client.
-  unsubscribers.push(onSnapshot(doc(fdb, 'subscription', 'main'), snap => {
-    if (snap.exists()){
-      const sub = snap.data();
-      db.settings.subscriptionStart = sub.subscriptionStart || null;
-      db.settings.subscriptionExpiry = sub.subscriptionExpiry || null;
-      db.settings.subscriptionPayments = sub.subscriptionPayments || [];
-      db.settings.subscriptionLastPayment = sub.subscriptionLastPayment || null;
-    } else {
-      db.settings.subscriptionStart = null;
-      db.settings.subscriptionExpiry = null;
-      db.settings.subscriptionPayments = [];
-      db.settings.subscriptionLastPayment = null;
-    }
-    updateSubscriptionGate();
-    scheduleRender();
-  }, err => console.error('subscription listener', err)));
 
   ['jobs','money','debts'].forEach(coll => {
     unsubscribers.push(onSnapshot(collection(fdb, coll), snap => {
@@ -2193,20 +2167,9 @@ async function logout(){
 }
 
 async function startApp(){
-  // Prefetch settings AND subscription so the gate is accurate on first paint.
   try {
-    const [settingsSnap, subSnap] = await Promise.all([
-      getDoc(doc(fdb, 'settings', 'main')),
-      getDoc(doc(fdb, 'subscription', 'main')).catch(() => ({ exists: false }))
-    ]);
-    if (settingsSnap.exists()) db.settings = { ...defaultSettings(), ...settingsSnap.data() };
-    if (subSnap.exists){
-      const sub = subSnap.data();
-      db.settings.subscriptionStart = sub.subscriptionStart || null;
-      db.settings.subscriptionExpiry = sub.subscriptionExpiry || null;
-      db.settings.subscriptionPayments = sub.subscriptionPayments || [];
-      db.settings.subscriptionLastPayment = sub.subscriptionLastPayment || null;
-    }
+    const snap = await getDoc(doc(fdb, 'settings', 'main'));
+    if (snap.exists()) db.settings = { ...defaultSettings(), ...snap.data() };
   } catch(e){ console.warn('settings prefetch', e); }
 
   $('#avatar').textContent = (session.name||'?').charAt(0).toUpperCase();
@@ -2235,12 +2198,10 @@ onAuthStateChanged(auth, async (user) => {
   try {
     let data = null, docId = user.uid;
 
-    // 1) Preferred: the users doc keyed by the Firebase Auth UID
     const uDoc = await getDoc(doc(fdb, 'users', user.uid));
     if (uDoc.exists()){
       data = uDoc.data();
     } else {
-      // 2) Fallback: a users doc created manually in Firestore, matched by email
       const email = (user.email || '').toLowerCase();
       if (email){
         const snap = await getDocs(query(collection(fdb, 'users'), where('email', '==', email)));
@@ -2361,6 +2322,7 @@ function init(){
   $('#payBtn').addEventListener('click', ()=> startMpesaPayment({
     phoneInputId: 'payPhone', statusId: 'payStatus', button: $('#payBtn')
   }));
+  $('#payClaimBtn').addEventListener('click', submitPaymentCode);
   $('#paywallSignOut').addEventListener('click', ()=>{
     if (confirm('Sign out of the system?')) logout();
   });
