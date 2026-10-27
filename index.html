@@ -714,7 +714,12 @@ function defaultSettings(){
   return {
     businessName:'Melah Branding', phone:'', email:'', address:'',
     currency:'KES', logo:null, theme:'light',
-    defaultRange:'today', includeCredit:'yes', receiptNote:'Thank you for your business!'
+    defaultRange:'today', includeCredit:'yes', receiptNote:'Thank you for your business!',
+    // Subscription fields — populated from subscription/main (server-owned).
+    subscriptionStart: null,
+    subscriptionExpiry: null,
+    subscriptionPayments: [],
+    subscriptionLastPayment: null
   };
 }
 
@@ -751,7 +756,7 @@ function toast(msg, kind=''){
    ------------------------------------------------------------
    BACKEND CONTRACT (your own API files):
 
-   1) POST  {apiBase}/api/stkpush
+   1) POST  {apiBase}/api/mpesa/stkpush
       Body JSON: { phone, amount, accountReference, transactionDesc, storeNumber, tillNumber }
         phone          -> normalised "2547XXXXXXXX"
         amount         -> 1500
@@ -760,16 +765,18 @@ function toast(msg, kind=''){
       Success JSON:  { success:true,  checkoutRequestId:"ws_CO_..." }
       Failure JSON:  { success:false, message:"..." }
 
-   2) GET   {apiBase}/api/stkpush/status?checkoutRequestId=ws_CO_...
+   2) GET   {apiBase}/api/mpesa/callback?checkoutRequestId=ws_CO_...
+      (same file as the Safaricom POST callback — dispatches on method)
       Response JSON: { status:"pending"|"success"|"failed",
                        mpesaReceipt:"SJ61...",   // when success
-                       amount:1500,              // when success
-                       message:"..." }           // when failed
+                       amount:1500 }             // when success
 
-   The status endpoint should reflect what the M-Pesa callback
-   recorded for that CheckoutRequestID (query Daraja or your DB).
-   If your backend lives on another origin, set apiBase below and
-   enable CORS for this site.
+   3) GET   {apiBase}/api/mpesa/callback?action=init
+      Creates subscription/main with a 30-day trial if it doesn't
+      exist yet. Called once on app load.
+
+   IMPORTANT: subscription expiry is written ONLY by the server
+   inside api/mpesa/callback.js. The browser never writes it.
    ============================================================ */
 const SUB_CONFIG = {
   amount: 1500,
@@ -779,8 +786,9 @@ const SUB_CONFIG = {
   currency: 'KES',
   apiBase: '', // e.g. 'https://melah-api.onrender.com' — leave '' for same origin
   endpoints: {
-    stkPush:   '/api/stkpush',
-    stkStatus: '/api/stkpush/status'
+    stkPush:   '/api/mpesa/stkpush',
+    stkStatus: '/api/mpesa/callback',
+    initTrial: '/api/mpesa/callback'
   },
   pollInterval: 3500,
   pollTimeout: 120000
@@ -801,17 +809,30 @@ function getSubState(){
 }
 
 async function ensureSubscription(){
-  if (db.settings.subscriptionStart && db.settings.subscriptionExpiry) return;
-  const now = new Date();
-  const expiry = new Date(now.getTime() + SUB_CONFIG.days * 86400000);
-  const patch = {
-    subscriptionStart: now.toISOString(),
-    subscriptionExpiry: expiry.toISOString()
-  };
+  // The server owns subscription/main and starts the 30-day trial on
+  // the first GET ?action=init. The browser NEVER writes subscription
+  // data — it only reads it (via getDoc here + the onSnapshot listener).
   try {
-    await fsSaveSettings(patch);
-    db.settings = { ...db.settings, ...patch };
-  } catch(err){ console.error('ensureSubscription', err); }
+    const res = await fetch(subUrl(SUB_CONFIG.endpoints.initTrial) + '?action=init');
+    if (!res.ok) throw new Error('init http ' + res.status);
+    const snap = await getDoc(doc(fdb, 'subscription', 'main'));
+    if (snap.exists()){
+      const sub = snap.data();
+      db.settings.subscriptionStart = sub.subscriptionStart || null;
+      db.settings.subscriptionExpiry = sub.subscriptionExpiry || null;
+      db.settings.subscriptionPayments = sub.subscriptionPayments || [];
+      db.settings.subscriptionLastPayment = sub.subscriptionLastPayment || null;
+    } else {
+      // Server didn't create it — fail closed so the paywall shows.
+      db.settings.subscriptionExpiry = '1970-01-01T00:00:00.000Z';
+    }
+  } catch(err){
+    console.warn('ensureSubscription failed', err);
+    // Server unreachable — fail closed (force paywall).
+    if (!db.settings.subscriptionExpiry) {
+      db.settings.subscriptionExpiry = '1970-01-01T00:00:00.000Z';
+    }
+  }
 }
 
 function updateSubChip(){
@@ -954,27 +975,27 @@ async function pollStkStatus(checkoutId){
 
 /* ---------- activation ---------- */
 async function activateSubscription(receipt, phone, amount){
-  const s = db.settings || {};
-  const now = new Date();
-  const currentExpiry = s.subscriptionExpiry ? new Date(s.subscriptionExpiry) : null;
-  const base = currentExpiry && currentExpiry > now ? currentExpiry : now;
-  const newExpiry = new Date(base.getTime() + SUB_CONFIG.days * 86400000);
-  const payments = [...(s.subscriptionPayments || []), {
-    receipt, phone, amount: Number(amount) || SUB_CONFIG.amount,
-    at: now.toISOString(), method: 'M-Pesa'
-  }].slice(-50);
-  const patch = {
-    subscriptionExpiry: newExpiry.toISOString(),
-    subscriptionLastPayment: now.toISOString(),
-    subscriptionPayments: payments
-  };
+  // The server already wrote subscription/main inside callback.js when
+  // Safaricom confirmed the payment. This just refreshes local state.
   try {
-    await fsSaveSettings(patch);
-  } catch(err){ console.error('activateSubscription', err); }
-  db.settings = { ...db.settings, ...patch };
-  updateSubscriptionGate();
-  if (currentView === 'settings') renderSubPanel();
-  toast('Subscription renewed until ' + newExpiry.toLocaleDateString('en-GB'), 'ok');
+    const snap = await getDoc(doc(fdb, 'subscription', 'main'));
+    if (snap.exists()){
+      const sub = snap.data();
+      db.settings.subscriptionStart = sub.subscriptionStart || null;
+      db.settings.subscriptionExpiry = sub.subscriptionExpiry || null;
+      db.settings.subscriptionPayments = sub.subscriptionPayments || [];
+      db.settings.subscriptionLastPayment = sub.subscriptionLastPayment || null;
+      updateSubscriptionGate();
+      if (currentView === 'settings') renderSubPanel();
+      const exp = sub.subscriptionExpiry ? new Date(sub.subscriptionExpiry) : null;
+      toast('Payment received — active until ' + (exp ? exp.toLocaleDateString('en-GB') : '—'), 'ok');
+    } else {
+      toast('Payment received — refreshing…', 'ok');
+    }
+  } catch(err){
+    console.warn('activateSubscription', err);
+    toast('Payment received — refreshing…', 'ok');
+  }
 }
 
 /* ---------- payment flow ---------- */
@@ -1178,13 +1199,39 @@ function setupListeners(){
 
   unsubscribers.push(onSnapshot(doc(fdb, 'settings', 'main'), snap => {
     if (snap.exists()){
-      db.settings = { ...defaultSettings(), ...snap.data() };
+      // Preserve subscription fields — they live in subscription/main,
+      // not in settings/main, so a naive spread would wipe them.
+      const preserved = {
+        subscriptionStart: db.settings.subscriptionStart,
+        subscriptionExpiry: db.settings.subscriptionExpiry,
+        subscriptionPayments: db.settings.subscriptionPayments,
+        subscriptionLastPayment: db.settings.subscriptionLastPayment
+      };
+      db.settings = { ...defaultSettings(), ...snap.data(), ...preserved };
       applyTheme(db.settings.theme || 'light');
       paintBrandMarks();
       updateSubscriptionGate();
     }
     scheduleRender();
   }, err => console.error('settings listener', err)));
+
+  // Server-owned subscription state — read-only on the client.
+  unsubscribers.push(onSnapshot(doc(fdb, 'subscription', 'main'), snap => {
+    if (snap.exists()){
+      const sub = snap.data();
+      db.settings.subscriptionStart = sub.subscriptionStart || null;
+      db.settings.subscriptionExpiry = sub.subscriptionExpiry || null;
+      db.settings.subscriptionPayments = sub.subscriptionPayments || [];
+      db.settings.subscriptionLastPayment = sub.subscriptionLastPayment || null;
+    } else {
+      db.settings.subscriptionStart = null;
+      db.settings.subscriptionExpiry = null;
+      db.settings.subscriptionPayments = [];
+      db.settings.subscriptionLastPayment = null;
+    }
+    updateSubscriptionGate();
+    scheduleRender();
+  }, err => console.error('subscription listener', err)));
 
   ['jobs','money','debts'].forEach(coll => {
     unsubscribers.push(onSnapshot(collection(fdb, coll), snap => {
@@ -2146,10 +2193,20 @@ async function logout(){
 }
 
 async function startApp(){
-  // Prefetch settings first so the subscription gate is accurate
+  // Prefetch settings AND subscription so the gate is accurate on first paint.
   try {
-    const snap = await getDoc(doc(fdb, 'settings', 'main'));
-    if (snap.exists()) db.settings = { ...defaultSettings(), ...snap.data() };
+    const [settingsSnap, subSnap] = await Promise.all([
+      getDoc(doc(fdb, 'settings', 'main')),
+      getDoc(doc(fdb, 'subscription', 'main')).catch(() => ({ exists: false }))
+    ]);
+    if (settingsSnap.exists()) db.settings = { ...defaultSettings(), ...settingsSnap.data() };
+    if (subSnap.exists){
+      const sub = subSnap.data();
+      db.settings.subscriptionStart = sub.subscriptionStart || null;
+      db.settings.subscriptionExpiry = sub.subscriptionExpiry || null;
+      db.settings.subscriptionPayments = sub.subscriptionPayments || [];
+      db.settings.subscriptionLastPayment = sub.subscriptionLastPayment || null;
+    }
   } catch(e){ console.warn('settings prefetch', e); }
 
   $('#avatar').textContent = (session.name||'?').charAt(0).toUpperCase();
