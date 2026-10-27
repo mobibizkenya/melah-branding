@@ -1,0 +1,10 @@
+{
+  "name": "liquorpos-mpesa",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "axios": "^1.7.7",
+    "firebase-admin": "^12.6.0"
+  }
+}

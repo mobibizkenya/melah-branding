@@ -1,0 +1,2469 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Melah Branding — POS & Job Management</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C6A15B; --gold-2:#A8813D; --gold-soft:#F0E4C8;
+  --bg:#FAF6EF; --surface:#FFFFFF; --surface-2:#F5EFE4;
+  --text:#241F17; --muted:#7C7060; --border:#E7DDCA;
+  --green:#2E7D5B; --green-2:#1F5C41; --green-soft:#E4EFE8;
+  --red:#B4432F; --amber:#B98A1E;
+  --brand-green:#2E7D5B;
+  --brand-font:Georgia,'Times New Roman',serif;
+  --shadow:0 8px 28px rgba(96,76,36,.09); --r:14px;
+}
+[data-theme="dark"]{
+  --gold:#D4B26A; --gold-2:#C9A55F; --gold-soft:#3A3122;
+  --bg:#131110; --surface:#1C1916; --surface-2:#241F19;
+  --text:#F1E9DA; --muted:#A3947A; --border:#332C23;
+  --green:#63C295; --green-2:#7ED4A6; --green-soft:#1F2E27;
+  --red:#E08269; --amber:#E0B65A;
+  --brand-green:#63C295;
+  --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .25s,color .25s;min-height:100vh}
+.hidden{display:none !important}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+.muted{color:var(--muted)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border:1px solid transparent;background:var(--gold);color:#20180a;font-weight:700;padding:.62rem 1.05rem;border-radius:10px;cursor:pointer;font-size:.88rem;font-family:inherit;transition:.18s;white-space:nowrap}
+.btn:hover{filter:brightness(1.07);transform:translateY(-1px);box-shadow:0 6px 18px rgba(198,161,91,.28)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent;border-color:var(--border);color:var(--text)}
+.btn.ghost:hover{border-color:var(--green);color:var(--green);box-shadow:none}
+.btn.danger{background:var(--red);color:#fff}
+.btn.danger:hover{box-shadow:0 6px 18px rgba(180,67,47,.3)}
+.btn.lg{padding:.85rem 1.5rem;font-size:.98rem;border-radius:12px}
+.btn.sm{padding:.34rem .62rem;font-size:.75rem;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:1.05rem;display:grid;place-items:center;transition:.18s;flex:none}
+.icon-btn:hover{border-color:var(--green);color:var(--green)}
+input,select,textarea{width:100%;padding:.62rem .75rem;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.88rem;font-family:inherit;transition:.16s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(46,125,91,.18)}
+input[readonly]{background:var(--surface-2);color:var(--muted);font-weight:600}
+label{display:flex;flex-direction:column;gap:.35rem;font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:800;letter-spacing:.02em;font-size:1.02rem}
+.brand > span:last-child,.brand .brand-name{color:var(--brand-green);font-family:var(--brand-font);font-style:italic;font-weight:700;letter-spacing:.01em}
+.brand-mark{color:var(--gold);display:grid;place-items:center;flex:none;filter:drop-shadow(0 0 6px rgba(46,125,91,.35))}
+.screen{min-height:100vh}
+#landing{background:radial-gradient(1100px 520px at 85% -12%,rgba(198,161,91,.28),transparent 62%),radial-gradient(900px 520px at -12% 112%,rgba(46,125,91,.14),transparent 60%),var(--bg)}
+.land-nav{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.1rem clamp(1rem,4vw,3.5rem);max-width:1280px;margin:0 auto}
+.land-links{display:flex;align-items:center;gap:1.6rem;font-size:.88rem;font-weight:600}
+.land-links a{color:var(--muted);transition:.18s}
+.land-links a:hover{color:var(--green)}
+.hero{max-width:1280px;margin:0 auto;padding:clamp(1.5rem,5vw,4rem) clamp(1rem,4vw,3.5rem) clamp(2rem,6vw,5rem);display:grid;grid-template-columns:1.15fr .85fr;gap:3rem;align-items:center}
+.pill{display:inline-block;padding:.35rem .85rem;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;background:var(--green-soft);color:var(--green);border:1px solid var(--green);margin-bottom:1.1rem}
+[data-theme="dark"] .pill{color:var(--green)}
+.hero h1{font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.1;letter-spacing:-.02em;font-weight:800}
+.hero h1 em{font-style:italic;color:var(--brand-green);font-family:var(--brand-font)}
+.hero p{margin-top:1.1rem;font-size:1.03rem;line-height:1.7;color:var(--muted);max-width:52ch}
+.hero-actions{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.8rem}
+.hero-stats{display:flex;gap:2.2rem;margin-top:2.4rem;flex-wrap:wrap}
+.hero-stats div{display:flex;flex-direction:column}
+.hero-stats strong{font-size:1.5rem;color:var(--green);font-family:Georgia,serif}
+.hero-stats span{font-size:.76rem;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;font-weight:600}
+.hero-art{position:relative;display:grid;place-items:center;min-height:340px}
+.hero-logo{width:min(300px,70vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;color:var(--gold);background:var(--surface);box-shadow:var(--shadow);border:1px solid var(--border);position:relative}
+.hero-logo::after{content:"";position:absolute;inset:-16px;border-radius:50%;border:1px dashed rgba(46,125,91,.5);animation:spin 34s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.float-card{position:absolute;display:flex;align-items:center;gap:.65rem;padding:.7rem .95rem;border-radius:12px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);font-size:.78rem;animation:float 5.5s ease-in-out infinite}
+.float-card b{display:block;font-size:.72rem;color:var(--muted);font-weight:600}
+.float-card span{font-weight:800;font-size:.9rem;color:var(--green)}
+.c1{top:6%;left:-4%} .c2{bottom:12%;right:-4%;animation-delay:1.4s} .c3{bottom:-2%;left:6%;animation-delay:2.6s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+.land-section{max-width:1280px;margin:0 auto;padding:clamp(2.5rem,6vw,4.5rem) clamp(1rem,4vw,3.5rem)}
+.land-section.alt{background:var(--surface-2);max-width:none;border-block:1px solid var(--border)}
+.land-section.alt > *{max-width:1280px;margin-inline:auto}
+.land-section h2{font-size:clamp(1.5rem,3vw,2.1rem);letter-spacing:-.02em}
+.land-section .sub{color:var(--muted);margin-top:.6rem;max-width:60ch;line-height:1.65}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.1rem;margin-top:2.2rem}
+.feature{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.4rem;transition:.2s}
+.feature:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--green)}
+.feature .fi{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:1.2rem;background:var(--green-soft);color:var(--green);margin-bottom:.9rem}
+.feature h3{font-size:.98rem;margin-bottom:.4rem}
+.feature p{font-size:.83rem;color:var(--muted);line-height:1.6}
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.85rem;margin-top:2rem}
+.mod{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:.6rem}
+.mod span{color:var(--green);font-size:1.05rem}
+.land-footer{border-top:2px solid var(--green);padding:2rem clamp(1rem,4vw,3.5rem);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;font-size:.82rem;color:var(--muted);max-width:1280px;margin:0 auto}
+#login{display:grid;place-items:center;padding:2rem 1rem;background:radial-gradient(900px 500px at 50% -10%,rgba(46,125,91,.18),transparent 60%),var(--bg)}
+.login-card{width:min(420px,100%);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.2rem;box-shadow:var(--shadow);text-align:center}
+.login-card .brand-mark{margin:0 auto 1rem;color:var(--green)}
+.login-card h2{font-size:1.35rem;letter-spacing:-.01em;color:var(--brand-green);font-family:var(--brand-font);font-style:italic}
+.login-card .sub{color:var(--muted);font-size:.85rem;margin:.4rem 0 1.6rem}
+.login-card form{display:flex;flex-direction:column;gap:.9rem;text-align:left}
+.login-card .btn{width:100%;margin-top:.4rem}
+.demo{margin-top:1.4rem;padding:.85rem;border-radius:10px;background:var(--surface-2);font-size:.75rem;color:var(--muted);line-height:1.7;text-align:left}
+.demo b{color:var(--green)}
+.back-link{display:inline-block;margin-top:1.1rem;font-size:.8rem;color:var(--muted);cursor:pointer}
+.back-link:hover{color:var(--green)}
+
+/* ---------- auth: tabs, password toggle, links ---------- */
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;padding:.3rem;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;margin-bottom:1.2rem}
+.auth-tab{padding:.55rem;border:none;background:transparent;color:var(--muted);font-family:inherit;font-weight:700;font-size:.85rem;border-radius:9px;cursor:pointer;transition:.18s}
+.auth-tab:hover{color:var(--green)}
+.auth-tab.active{background:var(--gold);color:#20180a}
+.pw-wrap{position:relative;display:flex;align-items:center;width:100%}
+.pw-wrap input{padding-right:2.7rem}
+.pw-toggle{position:absolute;right:.5rem;background:transparent;border:none;cursor:pointer;font-size:1rem;color:var(--muted);padding:.2rem;line-height:1}
+.pw-toggle:hover{color:var(--green)}
+.auth-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-top:-.15rem}
+label.check{display:flex;flex-direction:row;align-items:center;gap:.45rem;font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;letter-spacing:0}
+label.check input{width:16px;height:16px;accent-color:var(--green);cursor:pointer;flex:none}
+.link-btn{background:none;border:none;color:var(--green);font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;padding:0;text-decoration:underline}
+.link-btn:hover{color:var(--gold-2)}
+
+#app{min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:.9rem;padding:.7rem clamp(.8rem,3vw,1.6rem);background:var(--surface);border-bottom:1px solid var(--border)}
+.spacer{flex:1}
+.user-chip{display:flex;align-items:center;gap:.55rem;padding:.28rem .75rem .28rem .3rem;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:.8rem;font-weight:700;cursor:pointer}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:.78rem;font-weight:800;flex:none}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:270px;z-index:60;background:var(--surface);border-right:1px solid var(--border);transform:translateX(-102%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0);box-shadow:24px 0 60px rgba(0,0,0,.16)}
+.drawer-head{padding:1.2rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.7rem}
+.drawer nav{padding:.8rem;display:flex;flex-direction:column;gap:.2rem;overflow-y:auto;flex:1}
+.nav-item{display:flex;align-items:center;gap:.75rem;width:100%;padding:.7rem .8rem;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:.87rem;font-weight:650;border-radius:10px;cursor:pointer;text-align:left;transition:.16s}
+.nav-item:hover{background:var(--green-soft);color:var(--green)}
+.nav-item.active{background:var(--gold);color:#20180a;font-weight:800}
+.nav-item.active .nav-ico{color:#20180a}
+.nav-ico{width:20px;text-align:center;font-size:1rem;color:var(--green)}
+.drawer-foot{padding:1rem;border-top:1px solid var(--border)}
+.overlay{position:fixed;inset:0;background:rgba(15,12,7,.45);z-index:55;opacity:0;pointer-events:none;transition:opacity .28s;backdrop-filter:blur(2px)}
+.overlay.show{opacity:1;pointer-events:auto}
+main{flex:1;padding:clamp(1rem,2.6vw,2rem);max-width:1400px;width:100%;margin:0 auto}
+.view{animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.view-head{margin-bottom:1.4rem}
+.view-head h1{font-size:clamp(1.35rem,2.6vw,1.8rem);letter-spacing:-.02em;position:relative;display:inline-block;padding-bottom:.35rem}
+.view-head h1::after{content:"";position:absolute;left:0;bottom:0;width:38px;height:2px;border-radius:2px;background:var(--green)}
+.view-head p{color:var(--muted);font-size:.85rem;margin-top:.25rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.4rem}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.15rem;position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold)}
+.stat.g::before{background:var(--green)}
+.stat.r::before{background:var(--red)}
+.stat.a::before{background:var(--gold)}
+.stat .lbl{font-size:.73rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.stat .val{font-size:1.5rem;font-weight:800;margin-top:.45rem;letter-spacing:-.02em}
+.stat .sub{font-size:.75rem;color:var(--muted);margin-top:.3rem}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1.3rem}
+.panel h2{font-size:.98rem;margin-bottom:1rem;letter-spacing:-.01em;display:flex;align-items:center;gap:.5rem}
+.panel h2::before{content:"";width:3px;height:15px;border-radius:2px;background:var(--green)}
+.quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.7rem}
+.quick button{padding:.95rem .8rem;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.4rem;transition:.18s}
+.quick button:hover{border-color:var(--green);color:var(--green);transform:translateY(-2px)}
+.quick button i{font-style:normal;font-size:1.3rem;color:var(--green)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.9rem}
+.form-grid .span-2{grid-column:1/-1}
+.credit-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.9rem;padding:1rem;border-radius:12px;background:var(--green-soft);border:1px dashed var(--green)}
+.form-actions{display:flex;gap:.7rem;flex-wrap:wrap;padding-top:.2rem}
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.83rem;min-width:560px;background:var(--surface)}
+th{text-align:left;padding:.7rem .85rem;background:var(--surface-2);color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;font-weight:800;white-space:nowrap}
+td{padding:.7rem .85rem;border-top:1px solid var(--border);vertical-align:middle}
+tbody tr:hover{background:var(--green-soft)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.empty{padding:2.2rem;text-align:center;color:var(--muted);font-size:.85rem}
+.badge{display:inline-block;padding:.2rem .55rem;border-radius:999px;font-size:.68rem;font-weight:800;letter-spacing:.03em;white-space:nowrap}
+.badge.cash{background:var(--green-soft);color:var(--green)}
+.badge.mpesa{background:rgba(198,161,91,.2);color:var(--gold-2)}
+.badge.bank{background:rgba(60,110,190,.15);color:#3c6ebe}
+.badge.credit{background:rgba(180,67,47,.14);color:var(--red)}
+.badge.paid{background:var(--green-soft);color:var(--green)}
+.badge.partial{background:rgba(185,138,30,.16);color:var(--amber)}
+.badge.unpaid{background:rgba(180,67,47,.14);color:var(--red)}
+.badge.auto{background:var(--surface-2);color:var(--muted)}
+.toolbar{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.toolbar input,.toolbar select{width:auto;min-width:150px;flex:1}
+.chips{display:flex;gap:.45rem;flex-wrap:wrap}
+.chip{padding:.42rem .85rem;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--muted);font-family:inherit;transition:.16s}
+.chip:hover{border-color:var(--green);color:var(--green)}
+.chip.active{background:var(--gold);border-color:var(--gold);color:#20180a}
+#toast{position:fixed;bottom:1.4rem;left:50%;transform:translate(-50%,140%);z-index:400;background:var(--text);color:var(--bg);padding:.75rem 1.2rem;border-radius:11px;font-size:.85rem;font-weight:650;box-shadow:0 12px 34px rgba(0,0,0,.28);transition:transform .32s cubic-bezier(.4,0,.2,1);max-width:90vw}
+#toast.show{transform:translate(-50%,0)}
+#toast.err{background:var(--red);color:#fff}
+#toast.ok{background:var(--green-2);color:#fff}
+.modal-backdrop{position:fixed;inset:0;z-index:150;background:rgba(15,12,7,.5);display:grid;place-items:center;padding:1rem;backdrop-filter:blur(3px)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:1.5rem;width:min(460px,100%);box-shadow:var(--shadow);animation:pop .22s ease}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.modal h3{font-size:1.05rem;margin-bottom:1.1rem}
+.modal-body{display:flex;flex-direction:column;gap:.85rem;max-height:60vh;overflow-y:auto}
+.modal-actions{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.4rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.sec-title{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin:.5rem 0 .2rem}
+
+/* ---------- subscription / paywall ---------- */
+.sub-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.34rem .7rem;border-radius:999px;border:1px solid var(--border);background:var(--surface-2);font-size:.74rem;font-weight:800;cursor:pointer;color:var(--muted);font-family:inherit;transition:.16s;white-space:nowrap;flex:none}
+.sub-chip:hover{border-color:var(--green);color:var(--green)}
+.sub-chip.warn{color:var(--amber);border-color:rgba(185,138,30,.5)}
+.sub-chip.bad{color:var(--red);border-color:rgba(180,67,47,.5);background:rgba(180,67,47,.08)}
+.paywall{position:fixed;inset:0;z-index:300;background:radial-gradient(900px 500px at 50% -10%,rgba(46,125,91,.22),transparent 60%),rgba(20,17,12,.86);backdrop-filter:blur(6px);display:grid;place-items:center;padding:1rem;overflow-y:auto}
+.paywall-card{width:min(440px,100%);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem 1.8rem;box-shadow:0 24px 60px rgba(0,0,0,.4);text-align:center;margin:auto}
+.paywall-card .brand-mark{margin:0 auto .8rem;color:var(--green)}
+.paywall-card h2{font-size:1.4rem;letter-spacing:-.01em;color:var(--brand-green);font-family:var(--brand-font);font-style:italic;margin-bottom:.4rem}
+.paywall-card .sub{color:var(--muted);font-size:.88rem;line-height:1.6;margin-bottom:1.2rem}
+.paywall-info{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem}
+.paywall-info div{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:.6rem .7rem;text-align:left}
+.paywall-info b{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.2rem}
+.paywall-info span{font-size:.9rem;font-weight:800;color:var(--green)}
+.paywall-card label{text-align:left;margin-bottom:.8rem}
+.paywall-card .btn{width:100%}
+.paywall-foot{margin-top:1rem;font-size:.72rem;color:var(--muted);line-height:1.6}
+.paywall-foot button{background:none;border:none;color:var(--green);font-weight:700;cursor:pointer;font-family:inherit;font-size:.72rem;text-decoration:underline;padding:0}
+.sub-summary{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-bottom:.4rem}
+.sub-summary div{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:.55rem .7rem}
+.sub-summary b{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.15rem}
+.sub-summary span{font-size:.85rem;font-weight:800;color:var(--green)}
+.pay-status{font-size:.8rem;line-height:1.5;margin-top:.4rem;min-height:1.2em;text-align:center}
+.sub-history{max-height:220px;overflow-y:auto}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:2rem}
+  .hero-art{min-height:280px;order:-1}
+  .float-card{display:none}
+  .land-links a{display:none}
+}
+@media(max-width:600px){
+  .topbar .brand-name{display:none}
+  .user-chip span:last-child{display:none}
+  .user-chip{padding:.28rem}
+  .form-grid,.credit-fields{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+  .stat .val{font-size:1.25rem}
+  .land-footer{justify-content:center;text-align:center}
+  .sub-chip{padding:.3rem .55rem;font-size:.68rem}
+}
+@media print{.topbar,.drawer,.overlay,.btn,.paywall,.sub-chip{display:none !important}}
+</style>
+</head>
+<body>
+
+<!-- ================= LANDING ================= -->
+<div id="landing" class="screen">
+  <header class="land-nav">
+    <div class="brand"><span class="brand-mark" id="landMark"></span><span>Melah Branding</span></div>
+    <nav class="land-links">
+      <a href="#features">Features</a>
+      <a href="#modules">Modules</a>
+      <button class="btn" data-goto="login">Sign In</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-text">
+      <span class="pill">Print Shop · POS · Job Management</span>
+      <h1>Run your print shop <em>faster</em>, smarter, always balanced.</h1>
+      <p>Melah Branding POS tracks every laser cut, UV print, doming job, cash movement and customer debt — in real time, on any device, even on a busy counter.</p>
+      <div class="hero-actions">
+        <button class="btn lg" data-goto="login">Open POS →</button>
+        <a class="btn ghost lg" href="#features">See features</a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>9</strong><span>Modules</span></div>
+        <div><strong>3</strong><span>User accounts</span></div>
+        <div><strong>KES</strong><span>Currency ready</span></div>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="hero-logo" id="heroLogo"></div>
+      <div class="float-card c1">💰<div><b>Revenue Today</b><span id="floatRev">KES 0</span></div></div>
+      <div class="float-card c2">🧾<div><b>Jobs Completed</b><span id="floatJobs">0 today</span></div></div>
+      <div class="float-card c3">📉<div><b>Outstanding Debts</b><span id="floatDebt">KES 0</span></div></div>
+    </div>
+  </section>
+
+  <section id="features" class="land-section">
+    <h2>Everything the shop needs</h2>
+    <p class="sub">Built for busy counters — fast entry, accurate money, zero paperwork.</p>
+    <div class="feature-grid">
+      <div class="feature"><div class="fi">⚡</div><h3>Lightning Job Entry</h3><p>Record a laser, UV or doming job in seconds with automatic totals.</p></div>
+      <div class="feature"><div class="fi">💵</div><h3>Cash Book</h3><p>Money In / Money Out with categories — always know where cash went.</p></div>
+      <div class="feature"><div class="fi">🤝</div><h3>Debt Tracking</h3><p>Credit sales auto-create customer debts. Record repayments and watch balances update.</p></div>
+      <div class="feature"><div class="fi">📊</div><h3>Real Reports</h3><p>Daily, weekly, monthly or custom ranges with PDF & Excel export.</p></div>
+      <div class="feature"><div class="fi">🔐</div><h3>Roles & Access</h3><p>Admin gets full control. Workers get everything except Reports and Settings.</p></div>
+      <div class="feature"><div class="fi">☁️</div><h3>Cloud Sync</h3><p>Firebase Authentication and Firestore keep every device in sync in real time.</p></div>
+    </div>
+  </section>
+
+  <section id="modules" class="land-section alt">
+    <h2>All modules included</h2>
+    <p class="sub">One system for the entire shop floor.</p>
+    <div class="mod-grid">
+      <div class="mod"><span>▦</span>Dashboard</div>
+      <div class="mod"><span>✦</span>Laser Cutting</div>
+      <div class="mod"><span>◈</span>UV Printing</div>
+      <div class="mod"><span>◉</span>Doming</div>
+      <div class="mod"><span>✚</span>Other Jobs</div>
+      <div class="mod"><span>⇄</span>Money In / Out</div>
+      <div class="mod"><span>☰</span>Customer & Debts</div>
+      <div class="mod"><span>▤</span>Reports</div>
+      <div class="mod"><span>⚙</span>Settings</div>
+    </div>
+  </section>
+
+  <footer class="land-footer">
+    <div class="brand"><span class="brand-mark" id="footMark"></span><span>Melah Branding</span></div>
+    <p>© <span id="year"></span> Melah Branding. All rights reserved.</p>
+  </footer>
+</div>
+
+<!-- ================= LOGIN ================= -->
+<div id="login" class="screen hidden">
+  <div class="login-card">
+    <div class="brand-mark" id="loginMark"></div>
+    <h2>Melah Branding</h2>
+    <p class="sub">Sign in to the Melah Branding POS</p>
+
+    <div class="auth-tabs" id="authTabs">
+      <button type="button" class="auth-tab active" data-mode="email">Email</button>
+      <button type="button" class="auth-tab" data-mode="username">Username</button>
+    </div>
+
+    <form id="loginForm">
+      <label><span id="loginIdText">Email Address</span>
+        <input name="identifier" id="loginIdentifier" type="email" autocomplete="email" required placeholder="you@example.com">
+      </label>
+      <label>Password
+        <span class="pw-wrap">
+          <input name="password" id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••">
+          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">👁</button>
+        </span>
+      </label>
+      <div class="auth-row">
+        <label class="check"><input type="checkbox" id="keepSignedIn" checked> Keep me signed in</label>
+        <button type="button" class="link-btn" id="forgotBtn">Forgot password?</button>
+      </div>
+      <button class="btn" type="submit">Sign In</button>
+    </form>
+
+    <div class="demo">
+      <b>Accounts are managed by an administrator.</b><br>
+      Sign in with the email or username you were given. Forgot your password? Use the reset link — it is emailed to the Gmail on your account.
+    </div>
+    <span class="back-link" data-goto="landing">← Back to home</span>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
+  <header class="topbar">
+    <button class="icon-btn" id="menuBtn" aria-label="Open menu">☰</button>
+    <div class="brand"><span class="brand-mark" id="appMark"></span><span class="brand-name" id="appBrandName">Melah Branding</span></div>
+    <div class="spacer"></div>
+    <button class="sub-chip" id="subChip" title="Subscription status" type="button">—</button>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme">🌙</button>
+    <div class="user-chip" id="userChip">
+      <span class="avatar" id="avatar">A</span><span id="userNameLabel">Admin</span>
+    </div>
+  </header>
+
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head"><span class="brand-mark" id="drawerMark"></span><span class="brand-name" id="drawerBrandName">Melah Branding</span></div>
+    <nav id="navList"></nav>
+    <div class="drawer-foot"><button class="btn ghost" id="logoutBtn" style="width:100%">Sign out</button></div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+
+  <main>
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view">
+      <div class="view-head"><h1>Dashboard</h1><p id="dashDate" class="muted"></p></div>
+      <div class="stats" id="dashStats"></div>
+      <div class="panel"><h2>Quick Actions</h2><div class="quick" id="quickActions"></div></div>
+      <div class="panel"><h2>Recent Transactions</h2><div class="table-wrap"><table id="recentTable"></table></div></div>
+    </section>
+
+    <!-- LASER -->
+    <section id="view-laser" class="view hidden">
+      <div class="view-head"><h1>Laser Cutting</h1><p class="muted">Engraving, cutting and marking jobs.</p></div>
+      <div class="panel">
+        <h2>New Laser Job</h2>
+        <form class="form-grid" data-dept="laser" id="form-laser">
+          <label>Date<input type="date" name="date" required></label>
+          <label>Job Type<select name="jobType"><option>Engraving</option><option>Cutting</option><option>Marking</option><option>Engraving + Marking</option><option>Cutting + Marking</option></select></label>
+          <label>Item Worked On<input name="item" required placeholder="e.g. Acrylic keyholder"></label>
+          <label>Quantity<input type="number" name="qty" min="1" step="1" value="1" required></label>
+          <label>Unit Price<input type="number" name="unitPrice" min="0" step="0.01" required placeholder="0.00"></label>
+          <label>Total Amount<input name="total" readonly value="0.00"></label>
+          <label>Payment Method<select name="payment"><option>Cash</option><option>M-Pesa</option><option>Bank</option><option>Credit</option></select></label>
+          <div class="credit-fields hidden">
+            <label>Customer Name<input name="custName" placeholder="Full name"></label>
+            <label>Phone Number<input name="phone" placeholder="07XX XXX XXX"></label>
+            <label>Amount Owed<input type="number" name="owed" step="0.01" placeholder="0.00"></label>
+            <label>Due Date<input type="date" name="dueDate"></label>
+          </div>
+          <div class="span-2 form-actions"><button class="btn" type="submit">Save Job</button><button class="btn ghost" type="reset">Clear</button></div>
+        </form>
+      </div>
+      <div class="panel"><h2>Recent Laser Jobs</h2><div class="toolbar"><input id="search-laser" placeholder="Search jobs…"></div><div class="table-wrap"><table id="table-laser"></table></div></div>
+    </section>
+
+    <!-- UV -->
+    <section id="view-uv" class="view hidden">
+      <div class="view-head"><h1>UV Printing</h1><p class="muted">Flatbed and UV print jobs.</p></div>
+      <div class="panel">
+        <h2>New UV Print Job</h2>
+        <form class="form-grid" data-dept="uv" id="form-uv">
+          <label>Date<input type="date" name="date" required></label>
+          <label>Item Printed<input name="item" required placeholder="e.g. Phone case"></label>
+          <label>Quantity<input type="number" name="qty" min="1" step="1" value="1" required></label>
+          <label>Unit Price<input type="number" name="unitPrice" min="0" step="0.01" required placeholder="0.00"></label>
+          <label>Total Amount<input name="total" readonly value="0.00"></label>
+          <label>Payment Method<select name="payment"><option>Cash</option><option>M-Pesa</option><option>Bank</option><option>Credit</option></select></label>
+          <div class="credit-fields hidden">
+            <label>Customer Name<input name="custName" placeholder="Full name"></label>
+            <label>Phone Number<input name="phone" placeholder="07XX XXX XXX"></label>
+            <label>Amount Owed<input type="number" name="owed" step="0.01" placeholder="0.00"></label>
+            <label>Due Date<input type="date" name="dueDate"></label>
+          </div>
+          <div class="span-2 form-actions"><button class="btn" type="submit">Save Job</button><button class="btn ghost" type="reset">Clear</button></div>
+        </form>
+      </div>
+      <div class="panel"><h2>Recent UV Printing Jobs</h2><div class="toolbar"><input id="search-uv" placeholder="Search jobs…"></div><div class="table-wrap"><table id="table-uv"></table></div></div>
+    </section>
+
+    <!-- DOMING -->
+    <section id="view-doming" class="view hidden">
+      <div class="view-head"><h1>Doming</h1><p class="muted">Resin doming jobs and stickers.</p></div>
+      <div class="panel">
+        <h2>New Doming Job</h2>
+        <form class="form-grid" data-dept="doming" id="form-doming">
+          <label>Date<input type="date" name="date" required></label>
+          <label>Item<input name="item" required placeholder="e.g. Domed label"></label>
+          <label>Quantity<input type="number" name="qty" min="1" step="1" value="1" required></label>
+          <label>Unit Price<input type="number" name="unitPrice" min="0" step="0.01" required placeholder="0.00"></label>
+          <label>Total Amount<input name="total" readonly value="0.00"></label>
+          <label>Payment Method<select name="payment"><option>Cash</option><option>M-Pesa</option><option>Bank</option><option>Credit</option></select></label>
+          <div class="credit-fields hidden">
+            <label>Customer Name<input name="custName" placeholder="Full name"></label>
+            <label>Phone Number<input name="phone" placeholder="07XX XXX XXX"></label>
+            <label>Amount Owed<input type="number" name="owed" step="0.01" placeholder="0.00"></label>
+            <label>Due Date<input type="date" name="dueDate"></label>
+          </div>
+          <div class="span-2 form-actions"><button class="btn" type="submit">Save Job</button><button class="btn ghost" type="reset">Clear</button></div>
+        </form>
+      </div>
+      <div class="panel"><h2>Recent Doming Jobs</h2><div class="toolbar"><input id="search-doming" placeholder="Search jobs…"></div><div class="table-wrap"><table id="table-doming"></table></div></div>
+    </section>
+
+    <!-- OTHER -->
+    <section id="view-other" class="view hidden">
+      <div class="view-head"><h1>Other Jobs</h1><p class="muted">Any miscellaneous work done at the shop.</p></div>
+      <div class="panel">
+        <h2>New Miscellaneous Job</h2>
+        <form class="form-grid" data-dept="other" data-total-mode="direct" id="form-other">
+          <label>Date<input type="date" name="date" required></label>
+          <label>Job Description<input name="item" required placeholder="e.g. Banner design & print"></label>
+          <label>Quantity<input type="number" name="qty" min="1" step="1" value="1" required></label>
+          <label>Amount Charged<input type="number" name="unitPrice" min="0" step="0.01" required placeholder="0.00"></label>
+          <label>Total Amount<input name="total" readonly value="0.00"></label>
+          <label>Payment Method<select name="payment"><option>Cash</option><option>M-Pesa</option><option>Bank</option><option>Credit</option></select></label>
+          <div class="credit-fields hidden">
+            <label>Customer Name<input name="custName" placeholder="Full name"></label>
+            <label>Phone Number<input name="phone" placeholder="07XX XXX XXX"></label>
+            <label>Amount Owed<input type="number" name="owed" step="0.01" placeholder="0.00"></label>
+            <label>Due Date<input type="date" name="dueDate"></label>
+          </div>
+          <div class="span-2 form-actions"><button class="btn" type="submit">Save Job</button><button class="btn ghost" type="reset">Clear</button></div>
+        </form>
+      </div>
+      <div class="panel"><h2>Recent Miscellaneous Jobs</h2><div class="toolbar"><input id="search-other" placeholder="Search jobs…"></div><div class="table-wrap"><table id="table-other"></table></div></div>
+    </section>
+
+    <!-- MONEY -->
+    <section id="view-money" class="view hidden">
+      <div class="view-head"><h1>Money In / Money Out</h1><p class="muted">Your shop cash book. Job payments are recorded automatically.</p></div>
+      <div class="stats" id="moneyStats"></div>
+      <div class="panel">
+        <h2>Record Money In</h2>
+        <form class="form-grid" id="form-money-in">
+          <label>Description<input name="desc" required placeholder="e.g. Deposit from client"></label>
+          <label>Amount<input type="number" name="amount" min="0" step="0.01" required placeholder="0.00"></label>
+          <label>Source<select name="source"><option>Cash</option><option>M-Pesa</option><option>Bank</option><option>Other</option></select></label>
+          <label>Date<input type="date" name="date" required></label>
+          <div class="span-2 form-actions"><button class="btn" type="submit">Add Money In</button></div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Record Money Out</h2>
+        <form class="form-grid" id="form-money-out">
+          <label>Description<input name="desc" required placeholder="e.g. Acrylic sheets"></label>
+          <label>Amount<input type="number" name="amount" min="0" step="0.01" required placeholder="0.00"></label>
+          <label>Expense Category<select name="category"><option>Materials</option><option>Rent</option><option>Salaries</option><option>Utilities</option><option>Transport</option><option>Maintenance</option><option>Miscellaneous</option></select></label>
+          <label>Date<input type="date" name="date" required></label>
+          <div class="span-2 form-actions"><button class="btn danger" type="submit">Add Money Out</button></div>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Cash Book</h2>
+        <div class="toolbar">
+          <input id="search-money" placeholder="Search transactions…">
+          <div class="chips" id="moneyFilter">
+            <button class="chip active" data-f="all">All</button>
+            <button class="chip" data-f="in">Money In</button>
+            <button class="chip" data-f="out">Money Out</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table id="table-money"></table></div>
+      </div>
+    </section>
+
+    <!-- DEBTS -->
+    <section id="view-debts" class="view hidden">
+      <div class="view-head"><h1>Customers &amp; Debts</h1><p class="muted">Track credit sales, repayments and outstanding balances.</p></div>
+      <div class="stats" id="debtStats"></div>
+      <div class="panel">
+        <h2>Debt Ledger</h2>
+        <div class="toolbar">
+          <input id="search-debts" placeholder="Search customer name or phone…">
+          <select id="filter-debts">
+            <option value="all">All statuses</option>
+            <option value="Unpaid">Unpaid</option>
+            <option value="Partial">Partial</option>
+            <option value="Paid">Paid</option>
+          </select>
+          <button class="btn ghost" id="addDebtBtn">+ Manual Debt</button>
+        </div>
+        <div class="table-wrap"><table id="table-debts"></table></div>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section id="view-reports" class="view hidden">
+      <div class="view-head"><h1>Reports</h1><p class="muted">Business performance by period.</p></div>
+      <div class="panel">
+        <h2>Period</h2>
+        <div class="toolbar">
+          <div class="chips" id="rangeChips">
+            <button class="chip active" data-r="today">Today</button>
+            <button class="chip" data-r="week">This Week</button>
+            <button class="chip" data-r="month">This Month</button>
+            <button class="chip" data-r="custom">Custom</button>
+          </div>
+          <div id="customRange" class="toolbar hidden" style="margin:0">
+            <input type="date" id="rangeFrom"><input type="date" id="rangeTo">
+          </div>
+          <button class="btn ghost" id="exportCsv">⬇ Excel (CSV)</button>
+          <button class="btn" id="exportPdf">🖨 PDF</button>
+        </div>
+      </div>
+      <div id="reportOutput"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settings" class="view hidden">
+      <div class="view-head"><h1>Settings</h1><p class="muted">Business profile, users, backups and preferences.</p></div>
+
+      <div class="panel">
+        <h2>My Account &amp; Security</h2>
+        <div id="accountPanel"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Business Profile</h2>
+        <form class="form-grid" id="form-business">
+          <label>Business Name<input name="businessName" required></label>
+          <label>Phone<input name="phone" placeholder="07XX XXX XXX"></label>
+          <label>Email<input name="email" type="email" placeholder="shop@email.com"></label>
+          <label>Currency<input name="currency" placeholder="KES"></label>
+          <label class="span-2">Address<textarea name="address" rows="2" placeholder="Shop location"></textarea></label>
+          <div class="span-2">
+            <div class="sec-title">Logo</div>
+            <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;margin-top:.5rem">
+              <div id="logoPreview" style="width:60px;height:60px;border-radius:12px;border:1px solid var(--border);display:grid;place-items:center;color:var(--gold);background:var(--surface-2)"></div>
+              <input type="file" id="logoFile" accept="image/*" style="width:auto">
+              <button type="button" class="btn ghost sm" id="removeLogo">Remove logo</button>
+            </div>
+          </div>
+          <div class="span-2 form-actions"><button class="btn" type="submit">Save Business Info</button></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Report Preferences</h2>
+        <form class="form-grid" id="form-prefs">
+          <label>Default Report Period<select name="defaultRange"><option value="today">Today</option><option value="week">This Week</option><option value="month">This Month</option></select></label>
+          <label>Count credit sales as revenue?<select name="includeCredit"><option value="yes">Yes</option><option value="no">No</option></select></label>
+          <label class="span-2">Receipt / Report Footer Note<input name="receiptNote" placeholder="Thank you for your business!"></label>
+          <div class="span-2 form-actions"><button class="btn" type="submit">Save Preferences</button></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Subscription</h2>
+        <div id="subPanel"></div>
+      </div>
+
+      <div class="panel">
+        <h2>User Accounts</h2>
+        <div class="toolbar">
+          <span class="muted" style="font-size:.82rem">Each user has a document in the <em>users</em> collection: <b>name, username, email, role, active</b>. Admins have full access; workers can access everything except Reports &amp; Settings. Set <b>active</b> to false to block sign-in without deleting the account.</span>
+          <div class="spacer"></div>
+          <button class="btn" id="addUserBtn">+ Add User</button>
+        </div>
+        <div class="table-wrap"><table id="table-users"></table></div>
+      </div>
+
+      <div class="panel">
+        <h2>Data Migration</h2>
+        <div class="toolbar">
+          <button class="btn" id="migrateBtn">⬆ Migrate old localStorage → Firestore</button>
+        </div>
+        <p class="muted" style="font-size:.78rem;margin-top:.6rem">If you used the older offline version, click once to push its jobs, money, debts and settings into Firestore.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Backup &amp; Restore</h2>
+        <div class="toolbar">
+          <button class="btn" id="backupBtn">⬇ Download Backup (JSON)</button>
+          <div class="spacer"></div>
+          <button class="btn danger" id="resetBtn">Reset All Cloud Data</button>
+        </div>
+        <p class="muted" style="font-size:.78rem;margin-top:.6rem">Data is stored in Cloud Firestore. Back up regularly to keep a safe copy.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= PAYWALL ================= -->
+<div id="paywall" class="paywall hidden">
+  <div class="paywall-card">
+    <div class="brand-mark" id="paywallMark"></div>
+    <h2>Subscription Required</h2>
+    <p class="sub" id="paywallMsg">Your 30-day subscription has ended. Renew for KES 1,500 to keep using Melah Branding POS.</p>
+    <div class="paywall-info">
+      <div><b>Amount</b><span>KES 1,500</span></div>
+      <div><b>Duration</b><span>30 days</span></div>
+      <div><b>Till Number</b><span>1816752</span></div>
+      <div><b>Store No.</b><span>1347027</span></div>
+    </div>
+    <label>M-Pesa Phone Number
+      <input id="payPhone" type="tel" inputmode="tel" placeholder="07XX XXX XXX" autocomplete="tel">
+    </label>
+    <button class="btn lg" id="payBtn" type="button">Pay KES 1,500 via M-Pesa</button>
+    <p class="pay-status" id="payStatus"></p>
+    <p class="paywall-foot">You'll get an STK prompt on your phone. Enter your M-Pesa PIN to confirm.<br><button type="button" id="paywallSignOut">Sign out</button></p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div class="modal-backdrop hidden" id="modal">
+  <div class="modal">
+    <h3 id="modalTitle">Title</h3>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="modalCancel">Cancel</button>
+      <button class="btn" id="modalSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+/* ============================================================
+   Firebase
+   ============================================================ */
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  createUserWithEmailAndPassword, sendPasswordResetEmail,
+  setPersistence, browserLocalPersistence, browserSessionPersistence,
+  reauthenticateWithCredential, EmailAuthProvider, updatePassword
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, setDoc, getDoc, getDocs,
+  updateDoc, deleteDoc, onSnapshot, writeBatch, query, where
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBaRiXUNcyPi7lyceAepZ9x9BUXxSJTeZc",
+  authDomain: "melah-branding-f0a2a.firebaseapp.com",
+  projectId: "melah-branding-f0a2a",
+  storageBucket: "melah-branding-f0a2a.firebasestorage.app",
+  messagingSenderId: "82415694451",
+  appId: "1:82415694451:web:3fa19d7d046349bb0c3006"
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+const fdb  = getFirestore(firebaseApp);
+
+/* ============================================================
+   Constants & state
+   ============================================================ */
+const DEPTS = { laser:'Laser Cutting', uv:'UV Printing', doming:'Doming', other:'Other Jobs' };
+const NAV = [
+  {id:'dashboard', label:'Dashboard',        icon:'▦'},
+  {id:'laser',     label:'Laser Cutting',    icon:'✦'},
+  {id:'uv',        label:'UV Printing',      icon:'◈'},
+  {id:'doming',    label:'Doming',           icon:'◉'},
+  {id:'other',     label:'Other Jobs',       icon:'✚'},
+  {id:'money',     label:'Money In / Out',   icon:'⇄'},
+  {id:'debts',     label:'Customer & Debts', icon:'☰'},
+  {id:'reports',   label:'Reports',          icon:'▤', adminOnly:true},
+  {id:'settings',  label:'Settings',         icon:'⚙', adminOnly:true}
+];
+
+function defaultSettings(){
+  return {
+    businessName:'Melah Branding', phone:'', email:'', address:'',
+    currency:'KES', logo:null, theme:'light',
+    defaultRange:'today', includeCredit:'yes', receiptNote:'Thank you for your business!'
+  };
+}
+
+let db = { settings: defaultSettings(), jobs: [], money: [], debts: [], users: [] };
+let session = null;
+let unsubscribers = [];
+let currentView = 'dashboard', reportRange = 'today', moneyFilter = 'all';
+let loginMode = 'email';
+const isAdmin = () => session?.role === 'admin';
+
+/* ---------- helpers ---------- */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const todayISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+const round2 = n => Math.round((Number(n)||0) * 100) / 100;
+const numFmt = n => (Number(n)||0).toLocaleString('en-KE',{minimumFractionDigits:2, maximumFractionDigits:2});
+const money = n => (db?.settings?.currency || 'KES') + ' ' + numFmt(n);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = d => { if(!d) return '—'; const x = new Date(d+'T00:00:00'); return isNaN(x) ? d : x.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); };
+const validEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim());
+const validUsername = v => /^[a-z0-9._-]+$/.test(String(v||'').trim());
+
+function toast(msg, kind=''){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'show ' + kind;
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=> t.className = '', 3400);
+}
+
+/* ============================================================
+   SUBSCRIPTION & M-PESA PAYMENTS
+   ------------------------------------------------------------
+   BACKEND CONTRACT (your own API files):
+
+   1) POST  {apiBase}/api/stkpush
+      Body JSON: { phone, amount, accountReference, transactionDesc, storeNumber, tillNumber }
+        phone          -> normalised "2547XXXXXXXX"
+        amount         -> 1500
+        storeNumber    -> 1347027
+        tillNumber     -> 1816752   (use this as PartyB / BusinessShortCode)
+      Success JSON:  { success:true,  checkoutRequestId:"ws_CO_..." }
+      Failure JSON:  { success:false, message:"..." }
+
+   2) GET   {apiBase}/api/stkpush/status?checkoutRequestId=ws_CO_...
+      Response JSON: { status:"pending"|"success"|"failed",
+                       mpesaReceipt:"SJ61...",   // when success
+                       amount:1500,              // when success
+                       message:"..." }           // when failed
+
+   The status endpoint should reflect what the M-Pesa callback
+   recorded for that CheckoutRequestID (query Daraja or your DB).
+   If your backend lives on another origin, set apiBase below and
+   enable CORS for this site.
+   ============================================================ */
+const SUB_CONFIG = {
+  amount: 1500,
+  days: 30,
+  storeNumber: '1347027',
+  tillNumber: '1816752',
+  currency: 'KES',
+  apiBase: '', // e.g. 'https://melah-api.onrender.com' — leave '' for same origin
+  endpoints: {
+    stkPush:   '/api/stkpush',
+    stkStatus: '/api/stkpush/status'
+  },
+  pollInterval: 3500,
+  pollTimeout: 120000
+};
+const subUrl = (path) => (SUB_CONFIG.apiBase || '') + path;
+const LAST_PHONE_KEY = 'melah_last_phone';
+const PENDING_KEY = 'melah_pending_payments';
+
+/* ---------- subscription state ---------- */
+function getSubState(){
+  const s = db.settings || {};
+  const now = Date.now();
+  const expiry = s.subscriptionExpiry ? new Date(s.subscriptionExpiry) : null;
+  if (!expiry || isNaN(expiry)) return { status:'none', expiry:null, daysLeft:0 };
+  const msLeft = expiry.getTime() - now;
+  const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+  return { status: msLeft > 0 ? 'active' : 'expired', expiry, daysLeft };
+}
+
+async function ensureSubscription(){
+  if (db.settings.subscriptionStart && db.settings.subscriptionExpiry) return;
+  const now = new Date();
+  const expiry = new Date(now.getTime() + SUB_CONFIG.days * 86400000);
+  const patch = {
+    subscriptionStart: now.toISOString(),
+    subscriptionExpiry: expiry.toISOString()
+  };
+  try {
+    await fsSaveSettings(patch);
+    db.settings = { ...db.settings, ...patch };
+  } catch(err){ console.error('ensureSubscription', err); }
+}
+
+function updateSubChip(){
+  const chip = $('#subChip');
+  if (!chip || !session) return;
+  const st = getSubState();
+  chip.classList.remove('warn','bad');
+  if (st.status === 'active'){
+    chip.textContent = `🟢 ${st.daysLeft}d left`;
+    if (st.daysLeft <= 5) chip.classList.add('warn');
+    chip.title = `Subscription active until ${st.expiry.toLocaleDateString('en-GB')}`;
+  } else if (st.status === 'expired'){
+    chip.textContent = '🔴 Expired';
+    chip.classList.add('bad');
+    chip.title = 'Subscription expired — tap to renew';
+  } else {
+    chip.textContent = '⏳ …';
+    chip.title = 'Loading subscription';
+  }
+}
+
+function updateSubscriptionGate(){
+  if (!session) return;
+  updateSubChip();
+  const st = getSubState();
+  const paywall = $('#paywall');
+  if (!paywall) return;
+  if (st.status === 'active'){ paywall.classList.add('hidden'); return; }
+  if (st.status === 'none') return; // not initialised yet
+  showPaywall(st);
+}
+
+function showPaywall(st){
+  const paywall = $('#paywall');
+  if (!paywall) return;
+  $('#paywallMsg').textContent = st.expiry
+    ? `Your 30-day subscription ended on ${st.expiry.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}. Renew for KES 1,500 to keep using Melah Branding POS.`
+    : 'Your subscription has ended. Renew for KES 1,500 to keep using Melah Branding POS.';
+  if (paywall.classList.contains('hidden')){
+    paywall.classList.remove('hidden');
+    paintBrandMarks();
+    const lastPhone = localStorage.getItem(LAST_PHONE_KEY) || '';
+    if (lastPhone && !$('#payPhone').value) $('#payPhone').value = lastPhone;
+  }
+}
+
+/* ---------- phone helpers ---------- */
+function normalizePhone(input){
+  let p = String(input || '').replace(/[^\d+]/g, '');
+  if (p.startsWith('+')) p = p.slice(1);
+  if (p.startsWith('0')) p = '254' + p.slice(1);
+  else if (p.startsWith('7') || p.startsWith('1')) p = '254' + p;
+  if (!/^254(7|1)\d{8}$/.test(p)) return null;
+  return p;
+}
+
+/* ---------- pending payments (recover after reload) ---------- */
+function savePendingPayment(checkoutId, phone){
+  try {
+    const list = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+    list.push({ checkoutId, phone, at: Date.now() });
+    localStorage.setItem(PENDING_KEY, JSON.stringify(list));
+  } catch(e){}
+}
+function clearPendingPayment(checkoutId){
+  try {
+    const list = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]')
+      .filter(x => x.checkoutId !== checkoutId);
+    localStorage.setItem(PENDING_KEY, JSON.stringify(list));
+  } catch(e){}
+}
+async function resumePendingPayments(){
+  if (!session) return;
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); } catch(e){}
+  if (!list.length) return;
+  for (const p of list){
+    if (Date.now() - p.at > 86400000){ clearPendingPayment(p.checkoutId); continue; }
+    try {
+      const r = await checkStkStatus(p.checkoutId);
+      if (r.status === 'success'){
+        await activateSubscription(r.receipt || p.checkoutId, p.phone, r.amount);
+        clearPendingPayment(p.checkoutId);
+      } else if (r.status === 'failed'){
+        clearPendingPayment(p.checkoutId);
+      }
+    } catch(e){ /* retry next time */ }
+  }
+}
+
+/* ---------- API calls ---------- */
+async function apiStkPush(phone){
+  const res = await fetch(subUrl(SUB_CONFIG.endpoints.stkPush), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      phone,
+      amount: SUB_CONFIG.amount,
+      accountReference: 'MELAH-POS',
+      transactionDesc: 'Melah Branding POS subscription (30 days)',
+      storeNumber: SUB_CONFIG.storeNumber,
+      tillNumber: SUB_CONFIG.tillNumber
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || data.errorMessage || ('Payment request failed (' + res.status + ')'));
+  if (data.success === false) throw new Error(data.message || 'Payment request rejected');
+  return data;
+}
+
+async function checkStkStatus(checkoutId){
+  const url = subUrl(SUB_CONFIG.endpoints.stkStatus) + '?checkoutRequestId=' + encodeURIComponent(checkoutId);
+  const res = await fetch(url);
+  const data = await res.json().catch(() => ({}));
+  const raw = String(data.status || '').toLowerCase();
+  if (raw === 'success' || data.ResultCode === 0 || data.ResultCode === '0' || data.success === true){
+    return {
+      status: 'success',
+      receipt: data.mpesaReceipt || data.MpesaReceiptNumber || data.receipt || checkoutId,
+      amount: data.amount
+    };
+  }
+  if (raw === 'failed' || raw === 'cancelled' || raw === 'canceled' || raw === 'error'){
+    return { status: 'failed', message: data.message || data.ResultDesc || 'Payment was not completed' };
+  }
+  return { status: 'pending' };
+}
+
+async function pollStkStatus(checkoutId){
+  const start = Date.now();
+  while (Date.now() - start < SUB_CONFIG.pollTimeout){
+    await new Promise(r => setTimeout(r, SUB_CONFIG.pollInterval));
+    try {
+      const r = await checkStkStatus(checkoutId);
+      if (r.status !== 'pending') return r;
+    } catch(err){ console.warn('poll', err); }
+  }
+  return { status: 'pending' };
+}
+
+/* ---------- activation ---------- */
+async function activateSubscription(receipt, phone, amount){
+  const s = db.settings || {};
+  const now = new Date();
+  const currentExpiry = s.subscriptionExpiry ? new Date(s.subscriptionExpiry) : null;
+  const base = currentExpiry && currentExpiry > now ? currentExpiry : now;
+  const newExpiry = new Date(base.getTime() + SUB_CONFIG.days * 86400000);
+  const payments = [...(s.subscriptionPayments || []), {
+    receipt, phone, amount: Number(amount) || SUB_CONFIG.amount,
+    at: now.toISOString(), method: 'M-Pesa'
+  }].slice(-50);
+  const patch = {
+    subscriptionExpiry: newExpiry.toISOString(),
+    subscriptionLastPayment: now.toISOString(),
+    subscriptionPayments: payments
+  };
+  try {
+    await fsSaveSettings(patch);
+  } catch(err){ console.error('activateSubscription', err); }
+  db.settings = { ...db.settings, ...patch };
+  updateSubscriptionGate();
+  if (currentView === 'settings') renderSubPanel();
+  toast('Subscription renewed until ' + newExpiry.toLocaleDateString('en-GB'), 'ok');
+}
+
+/* ---------- payment flow ---------- */
+async function startMpesaPayment({ phoneInputId, statusId, button, onSuccess }){
+  const phone = normalizePhone($('#' + phoneInputId)?.value);
+  const statusEl = $('#' + statusId);
+  if (!phone){
+    toast('Enter a valid Safaricom number (e.g. 0712345678)', 'err');
+    return;
+  }
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Sending prompt…';
+  if (statusEl) statusEl.textContent = '';
+  try {
+    localStorage.setItem(LAST_PHONE_KEY, phone);
+    const data = await apiStkPush(phone);
+    const checkoutId = data.checkoutRequestId || data.CheckoutRequestID || data.id;
+    if (!checkoutId) throw new Error(data.message || 'Payment gateway did not return a checkout ID');
+    savePendingPayment(checkoutId, phone);
+    button.textContent = 'Waiting for PIN…';
+    if (statusEl) statusEl.innerHTML = '📱 <b>Check your phone</b> — enter your M-Pesa PIN to authorize KES 1,500.';
+    const result = await pollStkStatus(checkoutId);
+    if (result.status === 'success'){
+      await activateSubscription(result.receipt || checkoutId, phone, result.amount);
+      clearPendingPayment(checkoutId);
+      if (statusEl) statusEl.innerHTML = '✅ <b>Payment received.</b> Thank you!';
+      button.disabled = false;
+      button.textContent = original;
+      if (onSuccess) setTimeout(onSuccess, 700);
+    } else if (result.status === 'failed'){
+      clearPendingPayment(checkoutId);
+      throw new Error(result.message || 'Payment failed or was cancelled');
+    } else {
+      if (statusEl) statusEl.innerHTML = '⏱ Still waiting for confirmation. If you already paid, it will be applied automatically — reopen the app to check.';
+      button.disabled = false;
+      button.textContent = original;
+    }
+  } catch(err){
+    console.error(err);
+    toast(err.message || 'Payment failed', 'err');
+    if (statusEl) statusEl.textContent = '';
+    button.disabled = false;
+    button.textContent = original;
+  }
+}
+
+/* ---------- subscription UI (settings + renew) ---------- */
+function renderSubPanel(){
+  const el = $('#subPanel');
+  if (!el) return;
+  const st = getSubState();
+  const s = db.settings;
+  const payments = (s.subscriptionPayments || []).slice().reverse();
+  const statusLine = st.status === 'active'
+    ? `Expires on <b>${st.expiry.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</b> — <span class="badge paid">${st.daysLeft} day${st.daysLeft===1?'':'s'} left</span>`
+    : (st.status === 'expired'
+        ? `Expired on <b>${st.expiry.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</b> — <span class="badge unpaid">Expired</span>`
+        : `<span class="badge auto">Not started</span>`);
+  el.innerHTML = `
+    <div class="sub-summary">
+      <div><b>Status</b><span>${st.status === 'active' ? st.daysLeft + ' days left' : (st.status === 'expired' ? 'Expired' : 'Pending')}</span></div>
+      <div><b>Plan</b><span>KES 1,500 / 30 days</span></div>
+      <div><b>Till No.</b><span>1816752</span></div>
+      <div><b>Store No.</b><span>1347027</span></div>
+    </div>
+    <p class="muted" style="font-size:.82rem;margin:.6rem 0 1rem">${statusLine}</p>
+    <div class="toolbar" style="margin:0">
+      <button class="btn" id="renewBtn" type="button">Renew — Pay KES 1,500</button>
+    </div>
+    <div class="sec-title" style="margin-top:1rem">Payment History</div>
+    <div class="table-wrap sub-history"><table>
+      <thead><tr><th>Date</th><th>Phone</th><th>Receipt</th><th class="num">Amount</th></tr></thead>
+      <tbody>${ payments.length ? payments.map(p=>`
+        <tr>
+          <td>${new Date(p.at).toLocaleDateString('en-GB')}</td>
+          <td>${esc(p.phone||'—')}</td>
+          <td>${esc(p.receipt||'—')}</td>
+          <td class="num">${numFmt(p.amount)}</td>
+        </tr>`).join('') : `<tr><td colspan="4" class="empty">No payments yet.</td></tr>` }</tbody>
+    </table></div>
+    <p class="muted" style="font-size:.74rem;margin-top:.7rem">Payments are charged via M-Pesa STK push. After the payment is confirmed, 30 days are added to your subscription automatically.</p>
+  `;
+  $('#renewBtn').addEventListener('click', openRenewModal);
+}
+
+function openRenewModal(){
+  const st = getSubState();
+  const lastPhone = localStorage.getItem(LAST_PHONE_KEY) || '';
+  openModal('Renew Subscription', `
+    <div class="sub-summary">
+      <div><b>Amount</b><span>KES 1,500</span></div>
+      <div><b>Duration</b><span>30 days</span></div>
+      <div><b>Till No.</b><span>1816752</span></div>
+      <div><b>Store No.</b><span>1347027</span></div>
+    </div>
+    <p class="muted" style="font-size:.8rem;margin:.3rem 0 .2rem">Current: <b>${st.status === 'active' ? st.daysLeft + ' days left' : (st.status === 'expired' ? 'Expired' : 'Pending')}</b></p>
+    <label style="margin-top:.4rem">M-Pesa Phone Number
+      <input id="rPhone" type="tel" inputmode="tel" placeholder="07XX XXX XXX" autocomplete="tel" value="${esc(lastPhone)}">
+    </label>
+    <p class="muted" style="font-size:.78rem;line-height:1.55">Tap <b>Pay KES 1,500</b>. You'll get an STK prompt on your phone — enter your M-Pesa PIN to authorize the payment.</p>
+    <p class="pay-status" id="rStatus"></p>
+  `, async () => false, 'Pay KES 1,500');
+  const saveBtn = $('#modalSave');
+  saveBtn.onclick = () => startMpesaPayment({
+    phoneInputId: 'rPhone',
+    statusId: 'rStatus',
+    button: saveBtn,
+    onSuccess: () => closeModal()
+  });
+}
+
+/* ---------- branding ---------- */
+function logoSVG(size=34){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+    <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="2.6" opacity=".55"/>
+    <circle cx="50" cy="50" r="36" stroke="currentColor" stroke-width="2.6" opacity=".28"/>
+    <text x="50" y="68" text-anchor="middle" font-family="Georgia,'Times New Roman',serif"
+      font-style="italic" font-size="52" fill="currentColor">M</text>
+  </svg>`;
+}
+function brandMarkHTML(size=34){
+  if (db?.settings?.logo) return `<img src="${db.settings.logo}" alt="logo" style="width:${size}px;height:${size}px;object-fit:contain;border-radius:8px">`;
+  return logoSVG(size);
+}
+function paintBrandMarks(){
+  ['landMark','footMark','loginMark','appMark','drawerMark','heroLogo','logoPreview','paywallMark'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (!el) return;
+    const size = id === 'heroLogo' ? 190 : (id === 'logoPreview' ? 44 : 34);
+    el.innerHTML = brandMarkHTML(size);
+  });
+  const nm = db?.settings?.businessName || 'Melah Branding';
+  ['appBrandName','drawerBrandName'].forEach(id=>{ const e = document.getElementById(id); if(e) e.textContent = nm; });
+  document.title = nm + ' — POS & Job Management';
+}
+
+/* ---------- theme ---------- */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  const b = $('#themeBtn'); if (b) b.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+async function toggleTheme(){
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try { await fsSaveSettings({ theme: next }); } catch(e){ /* silent */ }
+}
+
+/* ---------- screen management ---------- */
+function showScreen(id){
+  $('#landing').classList.toggle('hidden', id !== 'landing');
+  $('#login').classList.toggle('hidden', id !== 'login');
+  $('#app').classList.toggle('hidden', id !== 'app');
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   Firestore CRUD helpers
+   ============================================================ */
+async function fsWrite(coll, record){
+  const id = record.id || uid();
+  const data = { ...record, id };
+  await setDoc(doc(fdb, coll, id), data);
+  return id;
+}
+async function fsUpdate(coll, id, patch){ await updateDoc(doc(fdb, coll, id), patch); }
+async function fsDelete(coll, id){ await deleteDoc(doc(fdb, coll, id)); }
+async function fsSaveSettings(patch){
+  await setDoc(doc(fdb, 'settings', 'main'), patch, { merge: true });
+}
+async function fsDeleteMoneyByRef(refVal){
+  const snap = await getDocs(query(collection(fdb, 'money'), where('ref', '==', refVal)));
+  if (snap.empty) return;
+  const batch = writeBatch(fdb);
+  snap.forEach(d => batch.delete(d.ref));
+  await batch.commit();
+}
+async function bulkDelete(coll, ids){
+  for (let i=0; i<ids.length; i+=450){
+    const batch = writeBatch(fdb);
+    ids.slice(i, i+450).forEach(id => batch.delete(doc(fdb, coll, id)));
+    await batch.commit();
+  }
+}
+
+/* ============================================================
+   Real-time listeners
+   ============================================================ */
+let renderScheduled = false;
+function scheduleRender(){
+  if (renderScheduled) return;
+  renderScheduled = true;
+  requestAnimationFrame(() => {
+    renderScheduled = false;
+    if (session) render(currentView);
+  });
+}
+
+function setupListeners(){
+  teardownListeners();
+
+  unsubscribers.push(onSnapshot(doc(fdb, 'settings', 'main'), snap => {
+    if (snap.exists()){
+      db.settings = { ...defaultSettings(), ...snap.data() };
+      applyTheme(db.settings.theme || 'light');
+      paintBrandMarks();
+      updateSubscriptionGate();
+    }
+    scheduleRender();
+  }, err => console.error('settings listener', err)));
+
+  ['jobs','money','debts'].forEach(coll => {
+    unsubscribers.push(onSnapshot(collection(fdb, coll), snap => {
+      db[coll] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      scheduleRender();
+    }, err => console.error(coll+' listener', err)));
+  });
+
+  if (session.role === 'admin'){
+    unsubscribers.push(onSnapshot(collection(fdb, 'users'), snap => {
+      db.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      scheduleRender();
+    }, err => console.error('users listener', err)));
+  }
+}
+function teardownListeners(){
+  unsubscribers.forEach(u => { try { u(); } catch(e){} });
+  unsubscribers = [];
+}
+
+/* ============================================================
+   Debts
+   ============================================================ */
+const balanceOf = d => round2((d.total||0) - (d.paid||0));
+function debtStatus(d){
+  const b = balanceOf(d);
+  if (b <= 0.001) return 'Paid';
+  return (d.paid||0) > 0 ? 'Partial' : 'Unpaid';
+}
+async function addCreditToDebt(name, phone, amount, dueDate){
+  name = (name||'').trim(); phone = (phone||'').trim();
+  amount = round2(amount);
+  if (!amount) return null;
+  let d = db.debts.find(x => x.phone && phone && x.phone === phone)
+       || db.debts.find(x => x.name && x.name.toLowerCase() === name.toLowerCase() && balanceOf(x) > 0);
+  if (!d){
+    const nd = {
+      id: uid(), name: name||'Walk-in customer', phone: phone||'',
+      total: amount, paid: 0, dueDate: dueDate||'',
+      createdAt: new Date().toISOString(), payments: []
+    };
+    await fsWrite('debts', nd);
+    return nd;
+  }
+  const patch = { total: round2((d.total||0) + amount) };
+  if (dueDate) patch.dueDate = dueDate;
+  if (name) patch.name = name;
+  if (phone) patch.phone = phone;
+  await fsUpdate('debts', d.id, patch);
+  return d;
+}
+
+/* ============================================================
+   Money
+   ============================================================ */
+function addMoney(type, desc, amount, source, date, ref){
+  const m = {
+    id: uid(), type, desc, amount: round2(amount),
+    date: date || todayISO(),
+    ref: ref || null,
+    auto: !!ref,
+    createdAt: new Date().toISOString()
+  };
+  if (type === 'in') m.source = source;
+  else m.category = source;
+  return fsWrite('money', m);
+}
+const removeMoneyByRef = refVal => fsDeleteMoneyByRef(refVal);
+
+/* ============================================================
+   Job forms
+   ============================================================ */
+function initJobForm(form){
+  const els = form.elements;
+  const dept = form.dataset.dept;
+  const paymentEl = els.payment;
+  const creditBox = form.querySelector('.credit-fields');
+  const totalEl = els.total, qtyEl = els.qty, priceEl = els.unitPrice, owedEl = els.owed;
+  let owedTouched = false;
+
+  els.date.value = todayISO();
+  if (owedEl) owedEl.addEventListener('input', ()=>{ owedTouched = true; });
+
+  function computeTotal(){
+    const q = parseFloat(qtyEl?.value) || 0;
+    const p = parseFloat(priceEl?.value) || 0;
+    if (form.dataset.totalMode === 'direct') return round2(p);
+    return round2(q * p);
+  }
+  function recalc(){
+    const t = computeTotal();
+    if (totalEl) totalEl.value = t.toFixed(2);
+    if (paymentEl.value === 'Credit' && owedEl && !owedTouched) owedEl.value = t.toFixed(2);
+  }
+  function syncCredit(){
+    const isCredit = paymentEl.value === 'Credit';
+    if (creditBox) creditBox.classList.toggle('hidden', !isCredit);
+    if (isCredit && owedEl && !owedTouched) owedEl.value = computeTotal().toFixed(2);
+  }
+  form.addEventListener('input', e=>{ if (e.target === owedEl) return; recalc(); syncCredit(); });
+  form.addEventListener('change', syncCredit);
+  form.addEventListener('reset', ()=>{ setTimeout(()=>{ owedTouched=false; els.date.value = todayISO(); recalc(); syncCredit(); },0); });
+  recalc(); syncCredit();
+
+  form.addEventListener('submit', async e=>{
+    e.preventDefault();
+    const btn = form.querySelector('button[type=submit]');
+    btn.disabled = true;
+    const f = new FormData(form);
+    const qty = parseFloat(f.get('qty')) || 0;
+    let total = computeTotal();
+    const unitPrice = (form.dataset.totalMode === 'direct') ? (qty ? round2(total/qty) : total) : (parseFloat(f.get('unitPrice'))||0);
+    const payment = f.get('payment');
+    const item = (f.get('item')||'').trim();
+    if (!item){ toast('Please enter the item / description','err'); btn.disabled = false; return; }
+    if (total <= 0){ toast('Total must be greater than zero','err'); btn.disabled = false; return; }
+
+    let custName = '', phone = '', owed = 0, dueDate = '';
+    if (payment === 'Credit'){
+      custName = (f.get('custName')||'').trim();
+      phone = (f.get('phone')||'').trim();
+      owed = round2(parseFloat(f.get('owed')) || total);
+      dueDate = f.get('dueDate') || '';
+      if (!custName){ toast('Customer name is required for credit','err'); btn.disabled = false; return; }
+      if (!phone){ toast('Phone number is required for credit','err'); btn.disabled = false; return; }
+      if (owed <= 0) owed = total;
+    }
+
+    const job = {
+      id: uid(), dept, date: f.get('date') || todayISO(),
+      jobType: f.get('jobType') || '', item, qty, unitPrice, total,
+      payment, custName, phone, owed, dueDate,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      await fsWrite('jobs', job);
+      if (payment === 'Credit'){
+        await addCreditToDebt(custName, phone, owed, dueDate);
+      } else {
+        await addMoney('in', `${DEPTS[dept]} — ${item} ×${qty}`, total, payment, job.date, 'job:'+job.id);
+      }
+      form.reset();
+      toast('Job saved successfully', 'ok');
+    } catch(err){
+      console.error(err);
+      toast('Save failed: ' + (err.message || err.code || 'unknown'), 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+/* ============================================================
+   Dashboard
+   ============================================================ */
+function renderDashboard(){
+  const t = todayISO();
+  const jobsToday = db.jobs.filter(j => j.date === t);
+  const revToday = jobsToday.reduce((s,j)=> s + (db.settings.includeCredit === 'no' && j.payment === 'Credit' ? 0 : j.total), 0)
+                 + db.money.filter(m => m.type==='in' && m.date===t && !m.auto).reduce((s,m)=>s+m.amount,0);
+  const expToday = db.money.filter(m => m.type==='out' && m.date===t).reduce((s,m)=>s+m.amount,0);
+  const debtTotal = db.debts.reduce((s,d)=> s + Math.max(0, balanceOf(d)), 0);
+
+  $('#dashDate').textContent = new Date().toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  $('#dashStats').innerHTML = `
+    <div class="stat g"><div class="lbl">Revenue Today</div><div class="val">${money(revToday)}</div><div class="sub">${jobsToday.length} job${jobsToday.length===1?'':'s'} recorded</div></div>
+    <div class="stat r"><div class="lbl">Expenses Today</div><div class="val">${money(expToday)}</div><div class="sub">Money out today</div></div>
+    <div class="stat g"><div class="lbl">Outstanding Debts</div><div class="val">${money(debtTotal)}</div><div class="sub">${db.debts.filter(d=>balanceOf(d)>0).length} customer(s) owing</div></div>
+    <div class="stat a"><div class="lbl">Jobs Completed Today</div><div class="val">${jobsToday.length}</div><div class="sub">Across all departments</div></div>`;
+
+  const actions = [
+    {v:'laser', i:'✦', l:'Laser Cutting'}, {v:'uv', i:'◈', l:'UV Printing'},
+    {v:'doming', i:'◉', l:'Doming'}, {v:'other', i:'✚', l:'Other Job'},
+    {v:'money', i:'⇄', l:'Money In / Out'}, {v:'debts', i:'☰', l:'Customer Debts'}
+  ];
+  $('#quickActions').innerHTML = actions.map(a=>`<button data-view="${a.v}"><i>${a.i}</i>${a.l}</button>`).join('');
+  $$('#quickActions button').forEach(b => b.addEventListener('click', ()=> navigate(b.dataset.view)));
+
+  const rows = [
+    ...db.jobs.map(j => ({date:j.date, created:j.createdAt||'', desc:`${DEPTS[j.dept]} • ${j.item}`, amount:j.total, type:'in', method:j.payment})),
+    ...db.money.map(m => ({date:m.date, created:m.createdAt||'', desc:m.desc, amount:m.amount, type:m.type, method:m.source||m.category}))
+  ].sort((a,b)=> String(b.created||'').localeCompare(String(a.created||''))).slice(0,8);
+
+  $('#recentTable').innerHTML = `
+    <thead><tr><th>Date</th><th>Description</th><th>Method</th><th class="num">Amount</th></tr></thead>
+    <tbody>${ rows.length ? rows.map(r=>`
+      <tr>
+        <td>${fmtDate(r.date)}</td>
+        <td>${esc(r.desc)}</td>
+        <td><span class="badge ${r.method==='M-Pesa'?'mpesa':r.method==='Credit'?'credit':r.method==='Bank'?'bank':'cash'}">${esc(r.method||'—')}</span></td>
+        <td class="num" style="color:${r.type==='out'?'var(--red)':'var(--green)'};font-weight:700">${r.type==='out'?'−':'+'} ${money(r.amount)}</td>
+      </tr>`).join('') : `<tr><td colspan="4" class="empty">No transactions yet. Record your first job to get started.</td></tr>` }
+    </tbody>`;
+
+  const fr = document.getElementById('floatRev'); if (fr) fr.textContent = money(revToday);
+  const fj = document.getElementById('floatJobs'); if (fj) fj.textContent = jobsToday.length + ' today';
+  const fd = document.getElementById('floatDebt'); if (fd) fd.textContent = money(debtTotal);
+}
+
+/* ============================================================
+   Job tables
+   ============================================================ */
+function renderJobsTable(dept){
+  const table = document.getElementById('table-'+dept);
+  if (!table) return;
+  const q = (document.getElementById('search-'+dept)?.value || '').toLowerCase();
+  let list = db.jobs.filter(j => j.dept === dept);
+  if (q) list = list.filter(j => [j.item, j.jobType, j.custName, j.phone, j.payment].join(' ').toLowerCase().includes(q));
+  list = list.sort((a,b)=> String(b.createdAt||'').localeCompare(String(a.createdAt||''))).slice(0,60);
+
+  const head = `<thead><tr>
+      <th>Date</th>${dept==='laser'?'<th>Type</th>':''}
+      <th>${dept==='other'?'Description':'Item'}</th><th class="num">Qty</th>
+      <th class="num">Unit</th><th class="num">Total</th><th>Payment</th><th>Customer</th><th></th>
+    </tr></thead>`;
+
+  table.innerHTML = head + `<tbody>${ list.length ? list.map(j=>`
+    <tr>
+      <td>${fmtDate(j.date)}</td>
+      ${dept==='laser'?`<td>${esc(j.jobType||'—')}</td>`:''}
+      <td>${esc(j.item)}</td>
+      <td class="num">${j.qty}</td>
+      <td class="num">${numFmt(j.unitPrice)}</td>
+      <td class="num" style="font-weight:700">${numFmt(j.total)}</td>
+      <td><span class="badge ${j.payment==='M-Pesa'?'mpesa':j.payment==='Credit'?'credit':j.payment==='Bank'?'bank':'cash'}">${esc(j.payment)}</span></td>
+      <td>${j.custName ? esc(j.custName) + (j.phone?`<br><span class="muted" style="font-size:.72rem">${esc(j.phone)}</span>`:'') : '<span class="muted">—</span>'}</td>
+      <td>${ isAdmin()
+        ? `<button class="btn danger sm" data-del-job="${j.id}">Delete</button>`
+        : `<span class="muted" style="font-size:.72rem">—</span>` }</td>
+    </tr>`).join('') : `<tr><td colspan="9" class="empty">No jobs recorded yet.</td></tr>` }</tbody>`;
+
+  $$('[data-del-job]', table).forEach(b => b.addEventListener('click', async ()=>{
+    if (!isAdmin()){ toast('Only administrators can delete jobs','err'); return; }
+    const id = b.dataset.delJob;
+    const job = db.jobs.find(j => j.id === id);
+    if (!job) return;
+    if (!confirm(`Delete this job?\n\n${job.item} — ${money(job.total)}\n\nLinked cash entries will also be removed.`)) return;
+    try {
+      await fsDelete('jobs', id);
+      await removeMoneyByRef('job:'+id);
+      toast('Job deleted');
+    } catch(err){ toast('Delete failed: '+err.message, 'err'); }
+  }));
+}
+
+/* ============================================================
+   Money
+   ============================================================ */
+function renderMoney(){
+  const t = todayISO();
+  const inToday = db.money.filter(m=>m.type==='in' && m.date===t).reduce((s,m)=>s+m.amount,0);
+  const outToday = db.money.filter(m=>m.type==='out' && m.date===t).reduce((s,m)=>s+m.amount,0);
+  const cash = db.money.filter(m=>m.type==='in').reduce((s,m)=>s+m.amount,0);
+  const spent = db.money.filter(m=>m.type==='out').reduce((s,m)=>s+m.amount,0);
+
+  $('#moneyStats').innerHTML = `
+    <div class="stat g"><div class="lbl">Money In Today</div><div class="val">${money(inToday)}</div></div>
+    <div class="stat r"><div class="lbl">Money Out Today</div><div class="val">${money(outToday)}</div></div>
+    <div class="stat g"><div class="lbl">Total Collected</div><div class="val">${money(cash)}</div></div>
+    <div class="stat a"><div class="lbl">Total Expenses</div><div class="val">${money(spent)}</div></div>`;
+
+  const q = ($('#search-money')?.value || '').toLowerCase();
+  let list = [...db.money];
+  if (moneyFilter !== 'all') list = list.filter(m => m.type === moneyFilter);
+  if (q) list = list.filter(m => [m.desc, m.source, m.category].join(' ').toLowerCase().includes(q));
+  list.sort((a,b)=> String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+
+  $('#table-money').innerHTML = `
+    <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Source / Category</th><th class="num">Amount</th><th></th></tr></thead>
+    <tbody>${ list.length ? list.map(m=>`
+      <tr>
+        <td>${fmtDate(m.date)}</td>
+        <td>${esc(m.desc)} ${m.auto?'<span class="badge auto">auto</span>':''}</td>
+        <td><span class="badge ${m.type==='in'?'paid':'unpaid'}">${m.type==='in'?'Money In':'Money Out'}</span></td>
+        <td>${esc(m.source || m.category || '—')}</td>
+        <td class="num" style="font-weight:700;color:${m.type==='out'?'var(--red)':'var(--green)'}">${m.type==='out'?'−':'+'} ${numFmt(m.amount)}</td>
+        <td>${ m.auto
+          ? '<span class="muted" style="font-size:.72rem">linked</span>'
+          : (isAdmin()
+              ? `<button class="btn danger sm" data-del-money="${m.id}">Delete</button>`
+              : '<span class="muted" style="font-size:.72rem">—</span>') }</td>
+      </tr>`).join('') : `<tr><td colspan="6" class="empty">No transactions found.</td></tr>` }</tbody>`;
+
+  $$('[data-del-money]').forEach(b => b.addEventListener('click', async ()=>{
+    if (!isAdmin()){ toast('Only administrators can delete transactions','err'); return; }
+    if (!confirm('Delete this transaction?')) return;
+    try {
+      await fsDelete('money', b.dataset.delMoney);
+      toast('Transaction deleted');
+    } catch(err){ toast('Delete failed: '+err.message, 'err'); }
+  }));
+}
+
+/* ============================================================
+   Debts
+   ============================================================ */
+function renderDebts(){
+  const totalOwed = db.debts.reduce((s,d)=> s + Math.max(0, balanceOf(d)), 0);
+  const unpaid = db.debts.filter(d => balanceOf(d) > 0).length;
+  const collected = db.debts.reduce((s,d)=> s + (d.paid||0), 0);
+
+  $('#debtStats').innerHTML = `
+    <div class="stat r"><div class="lbl">Total Outstanding</div><div class="val">${money(totalOwed)}</div></div>
+    <div class="stat a"><div class="lbl">Customers Owing</div><div class="val">${unpaid}</div></div>
+    <div class="stat g"><div class="lbl">Total Repaid</div><div class="val">${money(collected)}</div></div>
+    <div class="stat g"><div class="lbl">Debt Records</div><div class="val">${db.debts.length}</div></div>`;
+
+  const q = ($('#search-debts')?.value || '').toLowerCase();
+  const sf = $('#filter-debts')?.value || 'all';
+  let list = [...db.debts];
+  if (q) list = list.filter(d => (d.name+' '+d.phone).toLowerCase().includes(q));
+  if (sf !== 'all') list = list.filter(d => debtStatus(d) === sf);
+  list.sort((a,b)=> balanceOf(b) - balanceOf(a));
+
+  $('#table-debts').innerHTML = `
+    <thead><tr><th>Customer</th><th>Phone</th><th class="num">Owed</th><th class="num">Paid</th><th class="num">Balance</th><th>Due Date</th><th>Status</th><th></th></tr></thead>
+    <tbody>${ list.length ? list.map(d=>{
+      const bal = balanceOf(d), st = debtStatus(d);
+      return `<tr>
+        <td style="font-weight:650">${esc(d.name)}</td>
+        <td>${esc(d.phone||'—')}</td>
+        <td class="num">${numFmt(d.total)}</td>
+        <td class="num">${numFmt(d.paid)}</td>
+        <td class="num" style="font-weight:800;color:${bal>0?'var(--red)':'var(--green)'}">${numFmt(bal)}</td>
+        <td>${d.dueDate ? fmtDate(d.dueDate) : '—'}</td>
+        <td><span class="badge ${st.toLowerCase()}">${st}</span></td>
+        <td style="white-space:nowrap">
+          ${ bal > 0 ? `<button class="btn sm" data-pay="${d.id}">Pay</button>` : '' }
+          <button class="btn ghost sm" data-edit-debt="${d.id}">Edit</button>
+          ${ isAdmin() ? `<button class="btn danger sm" data-del-debt="${d.id}">Del</button>` : '' }
+        </td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="8" class="empty">No debt records found.</td></tr>` }</tbody>`;
+
+  $$('[data-pay]').forEach(b => b.addEventListener('click', ()=> openPaymentModal(b.dataset.pay)));
+  $$('[data-edit-debt]').forEach(b => b.addEventListener('click', ()=> openDebtModal(b.dataset.editDebt)));
+  $$('[data-del-debt]').forEach(b => b.addEventListener('click', async ()=>{
+    if (!isAdmin()){ toast('Only administrators can delete debt records','err'); return; }
+    const d = db.debts.find(x=>x.id===b.dataset.delDebt);
+    if (!d) return;
+    if (!confirm(`Delete debt record for ${d.name}? Linked payments will also be removed.`)) return;
+    try {
+      await fsDelete('debts', d.id);
+      await removeMoneyByRef('debt:'+d.id);
+      toast('Debt record deleted');
+    } catch(err){ toast('Delete failed: '+err.message, 'err'); }
+  }));
+}
+
+function openPaymentModal(debtId){
+  const d = db.debts.find(x=>x.id===debtId);
+  if (!d) return;
+  const bal = balanceOf(d);
+  openModal('Record Repayment', `
+    <p class="muted" style="font-size:.85rem">${esc(d.name)} — balance <b style="color:var(--red)">${money(bal)}</b></p>
+    <label>Amount Paid<input type="number" id="payAmt" step="0.01" min="0" max="${bal}" value="${bal.toFixed(2)}"></label>
+    <label>Payment Method<select id="payMethod"><option>Cash</option><option>M-Pesa</option><option>Bank</option></select></label>
+    <label>Date<input type="date" id="payDate" value="${todayISO()}"></label>
+  `, async ()=>{
+    const amt = round2(parseFloat($('#payAmt').value) || 0);
+    if (amt <= 0){ toast('Enter a valid amount','err'); return false; }
+    if (amt > bal + 0.001){ toast('Amount exceeds balance','err'); return false; }
+    const method = $('#payMethod').value, date = $('#payDate').value || todayISO();
+    try {
+      const payments = [...(d.payments||[]), {amount:amt, method, date, at:new Date().toISOString()}];
+      await fsUpdate('debts', d.id, { paid: round2((d.paid||0) + amt), payments });
+      await addMoney('in', `Debt repayment — ${d.name}`, amt, method, date, 'debt:'+d.id);
+      toast('Repayment recorded','ok');
+      return true;
+    } catch(err){ toast('Failed: '+err.message, 'err'); return false; }
+  }, 'Record Payment');
+}
+
+function openDebtModal(debtId){
+  const d = debtId ? db.debts.find(x=>x.id===debtId) : null;
+  openModal(d ? 'Edit Debt Record' : 'Add Manual Debt', `
+    <label>Customer Name<input id="dName" value="${esc(d?.name||'')}" placeholder="Full name"></label>
+    <label>Phone Number<input id="dPhone" value="${esc(d?.phone||'')}" placeholder="07XX XXX XXX"></label>
+    <div class="grid2">
+      <label>Amount Owed<input type="number" id="dTotal" step="0.01" value="${d? d.total.toFixed(2):''}" placeholder="0.00"></label>
+      <label>Amount Paid<input type="number" id="dPaid" step="0.01" value="${d? d.paid.toFixed(2):'0.00'}"></label>
+    </div>
+    <label>Due Date<input type="date" id="dDue" value="${d?.dueDate||''}"></label>
+  `, async ()=>{
+    const name = $('#dName').value.trim();
+    if (!name){ toast('Customer name is required','err'); return false; }
+    const total = round2(parseFloat($('#dTotal').value)||0);
+    const paid = round2(parseFloat($('#dPaid').value)||0);
+    const phone = $('#dPhone').value.trim();
+    const due = $('#dDue').value;
+    try {
+      if (d){
+        await fsUpdate('debts', d.id, { name, phone, total, paid, dueDate: due });
+      } else {
+        await fsWrite('debts', {
+          id: uid(), name, phone, total, paid, dueDate: due,
+          createdAt: new Date().toISOString(), payments: []
+        });
+      }
+      toast('Debt record saved','ok');
+      return true;
+    } catch(err){ toast('Failed: '+err.message, 'err'); return false; }
+  });
+}
+
+/* ============================================================
+   Reports
+   ============================================================ */
+function getRange(){
+  const today = todayISO();
+  if (reportRange === 'today') return {from:today, to:today, label:'Today'};
+  if (reportRange === 'week'){
+    const d = new Date(); const day = (d.getDay()+6)%7;
+    const mon = new Date(d.getTime() - day*86400000);
+    const iso = new Date(mon.getTime() - mon.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    return {from:iso, to:today, label:'This Week'};
+  }
+  if (reportRange === 'month'){
+    const d = new Date();
+    const first = new Date(d.getFullYear(), d.getMonth(), 1);
+    const iso = new Date(first.getTime() - first.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    return {from:iso, to:today, label:'This Month'};
+  }
+  const f = $('#rangeFrom').value || today, t = $('#rangeTo').value || today;
+  return {from:f, to:t, label:`${fmtDate(f)} → ${fmtDate(t)}`};
+}
+const inRange = (date, r) => date >= r.from && date <= r.to;
+
+function buildReport(){
+  const r = getRange();
+  const jobs = db.jobs.filter(j => inRange(j.date, r));
+  const moneyList = db.money.filter(m => inRange(m.date, r));
+
+  const jobRevenue = jobs.reduce((s,j)=> s + ((db.settings.includeCredit === 'no' && j.payment === 'Credit') ? 0 : j.total), 0);
+  const manualIn = moneyList.filter(m=>m.type==='in' && !m.auto).reduce((s,m)=>s+m.amount,0);
+  const revenue = round2(jobRevenue + manualIn);
+  const expenses = round2(moneyList.filter(m=>m.type==='out').reduce((s,m)=>s+m.amount,0));
+  const profit = round2(revenue - expenses);
+
+  const byMethod = {Cash:0, 'M-Pesa':0, Bank:0, Other:0};
+  moneyList.filter(m=>m.type==='in').forEach(m=>{
+    const k = ['Cash','M-Pesa','Bank'].includes(m.source) ? m.source : 'Other';
+    byMethod[k] += m.amount;
+  });
+  const creditGiven = round2(jobs.filter(j=>j.payment==='Credit').reduce((s,j)=>s + (j.owed||j.total),0));
+
+  const byDept = {};
+  Object.keys(DEPTS).forEach(k => byDept[k] = {count:0, amount:0});
+  jobs.forEach(j => { byDept[j.dept].count++; byDept[j.dept].amount += j.total; });
+
+  const cust = {};
+  jobs.filter(j=>j.custName).forEach(j=>{
+    const k = j.custName + '|' + j.phone;
+    cust[k] = cust[k] || {name:j.custName, phone:j.phone, total:0, jobs:0};
+    cust[k].total += j.total; cust[k].jobs++;
+  });
+  const topCustomers = Object.values(cust).sort((a,b)=>b.total-a.total).slice(0,8);
+
+  const outstanding = round2(db.debts.reduce((s,d)=> s + Math.max(0, balanceOf(d)), 0));
+
+  return {r, jobs, revenue, expenses, profit, byMethod, creditGiven, byDept, topCustomers, outstanding};
+}
+
+function renderReports(){
+  const d = buildReport();
+  $('#reportOutput').innerHTML = `
+    <div class="stats">
+      <div class="stat g"><div class="lbl">Total Revenue</div><div class="val">${money(d.revenue)}</div><div class="sub">${d.r.label}</div></div>
+      <div class="stat r"><div class="lbl">Total Expenses</div><div class="val">${money(d.expenses)}</div></div>
+      <div class="stat ${d.profit>=0?'g':'r'}"><div class="lbl">Profit</div><div class="val">${money(d.profit)}</div><div class="sub">Revenue − Expenses</div></div>
+      <div class="stat a"><div class="lbl">Jobs Done</div><div class="val">${d.jobs.length}</div><div class="sub">Credit given: ${money(d.creditGiven)}</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>Money In by Payment Method</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Method</th><th class="num">Amount</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge cash">Cash</span></td><td class="num">${money(d.byMethod.Cash)}</td></tr>
+          <tr><td><span class="badge mpesa">M-Pesa</span></td><td class="num">${money(d.byMethod['M-Pesa'])}</td></tr>
+          <tr><td><span class="badge bank">Bank</span></td><td class="num">${money(d.byMethod.Bank)}</td></tr>
+          <tr><td><span class="badge auto">Other</span></td><td class="num">${money(d.byMethod.Other)}</td></tr>
+          <tr style="background:var(--surface-2)"><td><b>Total Collected</b></td><td class="num"><b>${money(d.byMethod.Cash+d.byMethod['M-Pesa']+d.byMethod.Bank+d.byMethod.Other)}</b></td></tr>
+          <tr><td><span class="badge credit">Credit (unpaid)</span></td><td class="num" style="color:var(--red)">${money(d.creditGiven)}</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="panel">
+      <h2>Jobs by Department</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Department</th><th class="num">Jobs</th><th class="num">Amount</th></tr></thead>
+        <tbody>${Object.entries(DEPTS).map(([k,label])=>`
+          <tr><td>${label}</td><td class="num">${d.byDept[k].count}</td><td class="num">${money(d.byDept[k].amount)}</td></tr>`).join('')}
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="panel">
+      <h2>Top Customers</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Customer</th><th>Phone</th><th class="num">Jobs</th><th class="num">Value</th></tr></thead>
+        <tbody>${ d.topCustomers.length ? d.topCustomers.map(c=>`
+          <tr><td>${esc(c.name)}</td><td>${esc(c.phone||'—')}</td><td class="num">${c.jobs}</td><td class="num">${money(c.total)}</td></tr>`).join('')
+          : `<tr><td colspan="4" class="empty">No customer-linked jobs in this period.</td></tr>` }</tbody>
+      </table></div>
+    </div>
+
+    <div class="panel">
+      <h2>Outstanding Debts</h2>
+      <div class="stats" style="margin:0">
+        <div class="stat r"><div class="lbl">Total Owed to Shop</div><div class="val">${money(d.outstanding)}</div></div>
+        <div class="stat a"><div class="lbl">Customers Owing</div><div class="val">${db.debts.filter(x=>balanceOf(x)>0).length}</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Period Jobs Detail</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Dept</th><th>Item</th><th class="num">Qty</th><th class="num">Total</th><th>Payment</th></tr></thead>
+        <tbody>${ d.jobs.length ? d.jobs.slice().sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(j=>`
+          <tr><td>${fmtDate(j.date)}</td><td>${DEPTS[j.dept]}</td><td>${esc(j.item)}</td>
+          <td class="num">${j.qty}</td><td class="num">${numFmt(j.total)}</td>
+          <td><span class="badge ${j.payment==='M-Pesa'?'mpesa':j.payment==='Credit'?'credit':j.payment==='Bank'?'bank':'cash'}">${esc(j.payment)}</span></td></tr>`).join('')
+          : `<tr><td colspan="6" class="empty">No jobs in this period.</td></tr>` }</tbody>
+      </table></div>
+    </div>`;
+}
+
+function exportReportCSV(){
+  const d = buildReport();
+  const rows = [
+    ['Melah Branding — Report', d.r.label],
+    [],
+    ['SUMMARY'],
+    ['Total Revenue', d.revenue],
+    ['Total Expenses', d.expenses],
+    ['Profit', d.profit],
+    ['Jobs Completed', d.jobs.length],
+    ['Credit Given', d.creditGiven],
+    ['Outstanding Debts', d.outstanding],
+    [],
+    ['MONEY IN BY METHOD'],
+    ['Cash', d.byMethod.Cash],
+    ['M-Pesa', d.byMethod['M-Pesa']],
+    ['Bank', d.byMethod.Bank],
+    ['Other', d.byMethod.Other],
+    [],
+    ['JOBS BY DEPARTMENT'],
+    ...Object.entries(DEPTS).map(([k,l]) => [l, d.byDept[k].count, d.byDept[k].amount]),
+    [],
+    ['TOP CUSTOMERS'],
+    ['Name','Phone','Jobs','Value'],
+    ...d.topCustomers.map(c=>[c.name,c.phone,c.jobs,c.total]),
+    [],
+    ['JOB DETAIL'],
+    ['Date','Department','Item','Qty','Unit Price','Total','Payment','Customer','Phone'],
+    ...d.jobs.map(j=>[j.date, DEPTS[j.dept], j.item, j.qty, j.unitPrice, j.total, j.payment, j.custName||'', j.phone||''])
+  ];
+  const csv = rows.map(r => r.map(c => `"${String(c ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadBlob(new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'}), `Melah-Report-${d.r.from}_${d.r.to}.csv`);
+  toast('Excel (CSV) exported','ok');
+}
+
+function exportReportPDF(){
+  const d = buildReport();
+  const biz = db.settings;
+  const html = `
+    <h1 style="margin:0 0 4px">${esc(biz.businessName)}</h1>
+    <p style="margin:0;color:#666;font-size:12px">${esc(biz.phone||'')} ${biz.email?'• '+esc(biz.email):''}</p>
+    <h2 style="margin:18px 0 6px">Business Report — ${d.r.label}</h2>
+    <table>
+      <tr><th>Total Revenue</th><td>${money(d.revenue)}</td></tr>
+      <tr><th>Total Expenses</th><td>${money(d.expenses)}</td></tr>
+      <tr><th>Profit</th><td>${money(d.profit)}</td></tr>
+      <tr><th>Jobs Completed</th><td>${d.jobs.length}</td></tr>
+      <tr><th>Credit Given</th><td>${money(d.creditGiven)}</td></tr>
+      <tr><th>Outstanding Debts</th><td>${money(d.outstanding)}</td></tr>
+    </table>
+    <h3>Money In by Payment Method</h3>
+    <table>
+      <tr><th>Cash</th><td>${money(d.byMethod.Cash)}</td></tr>
+      <tr><th>M-Pesa</th><td>${money(d.byMethod['M-Pesa'])}</td></tr>
+      <tr><th>Bank</th><td>${money(d.byMethod.Bank)}</td></tr>
+      <tr><th>Other</th><td>${money(d.byMethod.Other)}</td></tr>
+    </table>
+    <h3>Jobs by Department</h3>
+    <table><tr><th>Department</th><th>Jobs</th><th>Amount</th></tr>
+      ${Object.entries(DEPTS).map(([k,l])=>`<tr><td>${l}</td><td>${d.byDept[k].count}</td><td>${money(d.byDept[k].amount)}</td></tr>`).join('')}
+    </table>
+    <h3>Top Customers</h3>
+    <table><tr><th>Customer</th><th>Phone</th><th>Jobs</th><th>Value</th></tr>
+      ${d.topCustomers.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.phone||'')}</td><td>${c.jobs}</td><td>${money(c.total)}</td></tr>`).join('') || '<tr><td colspan="4">None</td></tr>'}
+    </table>
+    <h3>Job Detail</h3>
+    <table><tr><th>Date</th><th>Dept</th><th>Item</th><th>Qty</th><th>Total</th><th>Payment</th></tr>
+      ${d.jobs.map(j=>`<tr><td>${fmtDate(j.date)}</td><td>${DEPTS[j.dept]}</td><td>${esc(j.item)}</td><td>${j.qty}</td><td>${numFmt(j.total)}</td><td>${esc(j.payment)}</td></tr>`).join('')}
+    </table>
+    <p style="margin-top:24px;font-size:12px;color:#666">${esc(biz.receiptNote||'')}</p>`;
+
+  const w = window.open('', '_blank');
+  if (!w){ toast('Allow pop-ups to export PDF','err'); return; }
+  w.document.write(`<html><head><title>Report ${d.r.label}</title><style>
+    body{font-family:Segoe UI,Arial,sans-serif;padding:32px;color:#222}
+    h1{color:#2E7D5B}h3{margin-top:20px;color:#2E7D5B}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+    th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}
+    th{background:#E4EFE8}
+  </style></head><body>${html}</body></html>`);
+  w.document.close(); w.focus();
+  setTimeout(()=> w.print(), 350);
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 1500);
+}
+
+/* ============================================================
+   Account & password
+   ============================================================ */
+function accountHTML(){
+  return `
+    <div class="form-grid">
+      <label>Name<input value="${esc(session?.name||'')}" readonly></label>
+      <label>Username<input value="${esc(session?.username||'—')}" readonly></label>
+      <label>Email (reset link is sent here)<input value="${esc(session?.email||'—')}" readonly></label>
+      <label>Role<input value="${session?.role==='admin'?'Administrator':'Worker'}" readonly></label>
+    </div>
+    <div class="sec-title">Password</div>
+    <p class="muted" style="font-size:.78rem;line-height:1.6;margin-bottom:.8rem">Email yourself a secure reset link, or set a new password right here.</p>
+    <div class="toolbar" style="margin:0">
+      <button type="button" class="btn ghost" data-acct-reset>✉ Email me a reset link</button>
+      <button type="button" class="btn" data-acct-change>🔑 Set a new password</button>
+    </div>`;
+}
+function wireAccountPanel(root){
+  $$('[data-acct-reset]', root).forEach(b => b.addEventListener('click', ()=> sendReset(session?.email)));
+  $$('[data-acct-change]', root).forEach(b => b.addEventListener('click', openChangePasswordModal));
+}
+function openAccountModal(){
+  if (!session) return;
+  openModal('My Account', accountHTML(), async ()=> true, 'Close');
+  wireAccountPanel($('#modalBody'));
+}
+function openChangePasswordModal(){
+  openModal('Set a New Password', `
+    <label>Current Password<input type="password" id="curPw" autocomplete="current-password"></label>
+    <label>New Password<input type="password" id="newPw" autocomplete="new-password" placeholder="At least 6 characters"></label>
+    <label>Confirm New Password<input type="password" id="newPw2" autocomplete="new-password"></label>
+    <p class="muted" style="font-size:.75rem">For security, Firebase may ask you to sign in again before the change.</p>
+  `, async ()=>{
+    const cur = $('#curPw').value, nw = $('#newPw').value, nw2 = $('#newPw2').value;
+    if (!cur){ toast('Enter your current password','err'); return false; }
+    if (!nw || nw.length < 6){ toast('New password must be at least 6 characters','err'); return false; }
+    if (nw !== nw2){ toast('New passwords do not match','err'); return false; }
+    try {
+      const user = auth.currentUser;
+      const cred = EmailAuthProvider.credential(user.email, cur);
+      await reauthenticateWithCredential(user, cred);
+      await updatePassword(user, nw);
+      toast('Password updated successfully','ok');
+      return true;
+    } catch(err){
+      console.error(err);
+      const map = {
+        'auth/wrong-password':'Current password is incorrect',
+        'auth/invalid-credential':'Current password is incorrect',
+        'auth/requires-recent-login':'Please sign out and back in, then try again',
+        'auth/weak-password':'New password is too weak'
+      };
+      toast(map[err.code] || 'Could not update password', 'err');
+      return false;
+    }
+  }, 'Update Password');
+}
+async function sendReset(email){
+  email = String(email||'').trim().toLowerCase();
+  if (!email){ toast('No email address on this account','err'); return false; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    toast('Reset link sent — check the Gmail inbox for ' + email, 'ok');
+    return true;
+  } catch(err){
+    console.error(err);
+    const map = {
+      'auth/user-not-found':'No account exists with that email',
+      'auth/invalid-email':'That email address is invalid',
+      'auth/too-many-requests':'Too many requests — try again later'
+    };
+    toast(map[err.code] || 'Could not send the reset link', 'err');
+    return false;
+  }
+}
+
+/* ============================================================
+   Settings
+   ============================================================ */
+function renderSettings(){
+  const s = db.settings;
+  const f = $('#form-business');
+  f.businessName.value = s.businessName || '';
+  f.phone.value = s.phone || '';
+  f.email.value = s.email || '';
+  f.currency.value = s.currency || 'KES';
+  f.address.value = s.address || '';
+
+  const p = $('#form-prefs');
+  p.defaultRange.value = s.defaultRange || 'today';
+  p.includeCredit.value = s.includeCredit || 'yes';
+  p.receiptNote.value = s.receiptNote || '';
+
+  const ap = $('#accountPanel');
+  if (ap){ ap.innerHTML = accountHTML(); wireAccountPanel(ap); }
+
+  renderSubPanel();
+
+  const tableUsers = $('#table-users');
+  if (tableUsers){
+    tableUsers.innerHTML = `
+      <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+      <tbody>${ db.users.length ? db.users.map(u=>`
+        <tr>
+          <td style="font-weight:650">${esc(u.name||'—')}</td>
+          <td>${esc(u.username||'—')}</td>
+          <td>${esc(u.email||'—')}</td>
+          <td><span class="badge ${u.role==='admin'?'mpesa':'auto'}">${u.role === 'admin' ? 'Administrator' : 'Worker'}</span></td>
+          <td><span class="badge ${u.active === false ? 'unpaid' : 'paid'}">${u.active === false ? 'Inactive' : 'Active'}</span></td>
+          <td style="white-space:nowrap">
+            ${ u.email ? `<button class="btn ghost sm" data-reset-user="${u.id}">Reset link</button>` : '' }
+            <button class="btn ghost sm" data-edit-user="${u.id}">Edit</button>
+            <button class="btn danger sm" data-del-user="${u.id}">Delete</button>
+          </td>
+        </tr>`).join('') : `<tr><td colspan="6" class="empty">No user documents found in the <em>users</em> collection.</td></tr>` }</tbody>`;
+
+    $$('[data-reset-user]', tableUsers).forEach(b => b.addEventListener('click', async ()=>{
+      const u = db.users.find(x=>x.id===b.dataset.resetUser);
+      if (!u?.email){ toast('This user has no email address','err'); return; }
+      if (!confirm(`Send a password reset link to ${u.email}?`)) return;
+      await sendReset(u.email);
+    }));
+    $$('[data-edit-user]', tableUsers).forEach(b => b.addEventListener('click', ()=> openUserModal(b.dataset.editUser)));
+    $$('[data-del-user]', tableUsers).forEach(b => b.addEventListener('click', async ()=>{
+      const u = db.users.find(x=>x.id===b.dataset.delUser);
+      if (!u) return;
+      if (u.id === session.id){ toast('You cannot delete your own account','err'); return; }
+      const admins = db.users.filter(x=>x.role==='admin' && x.active !== false);
+      if (u.role === 'admin' && u.active !== false && admins.length <= 1){ toast('At least one active admin is required','err'); return; }
+      if (!confirm(`Remove user "${u.name}"?\n\nNote: this deletes their Firestore profile. To fully remove the sign-in account, also delete it from the Firebase Console.`)) return;
+      try {
+        await fsDelete('users', u.id);
+        toast('User profile removed');
+      } catch(err){ toast('Delete failed: '+err.message, 'err'); }
+    }));
+  }
+}
+
+/* ---------- Create user via secondary app so admin stays signed in ---------- */
+async function createUserAccount({ email, password, name, username, role, active }){
+  const tempApp = initializeApp(firebaseConfig, 'createUser_' + Date.now());
+  try {
+    const tempAuth = getAuth(tempApp);
+    const cred = await createUserWithEmailAndPassword(tempAuth, email, password);
+    const newUid = cred.user.uid;
+    try { await signOut(tempAuth); } catch(e){}
+    await setDoc(doc(fdb, 'users', newUid), {
+      name,
+      username: String(username).toLowerCase(),
+      email: String(email).toLowerCase(),
+      role,
+      active: active !== false,
+      createdAt: new Date().toISOString()
+    });
+    return newUid;
+  } finally {
+    try { await deleteApp(tempApp); } catch(e){}
+  }
+}
+
+function openUserModal(userId){
+  const u = userId ? db.users.find(x=>x.id===userId) : null;
+  openModal(u ? 'Edit User' : 'Add User', `
+    <label>Full Name<input id="uName" value="${esc(u?.name||'')}" placeholder="e.g. Jane Wanjiru"></label>
+    <label>Username<input id="uUser" value="${esc(u?.username||'')}" placeholder="jane"></label>
+    <label>Email (Gmail)<input id="uEmail" type="email" value="${esc(u?.email||'')}" placeholder="jane@gmail.com" ${u?'readonly':''}></label>
+    ${ u ? '' : `<label>Password<input id="uPass" type="password" placeholder="At least 6 characters"></label>` }
+    <label>Role<select id="uRole">
+      <option value="worker" ${u?.role==='worker'?'selected':''}>Worker (no Reports / Settings)</option>
+      <option value="admin" ${u?.role==='admin'?'selected':''}>Administrator (full access)</option>
+    </select></label>
+    <label class="check"><input type="checkbox" id="uActive" ${u && u.active === false ? '' : 'checked'}> Account active (can sign in)</label>
+    ${ u
+      ? '<p class="muted" style="font-size:.75rem">Email cannot be changed here — change it in Firebase Authentication, or delete and recreate the user.</p>'
+      : '<p class="muted" style="font-size:.75rem">The account is created in Firebase Authentication and a matching document is written to the <em>users</em> collection.</p>' }
+  `, async ()=>{
+    const name = $('#uName').value.trim();
+    const username = $('#uUser').value.trim().toLowerCase();
+    const role = $('#uRole').value;
+    const active = $('#uActive').checked;
+
+    if (!name){ toast('Full name is required','err'); return false; }
+    if (!username){ toast('Username is required','err'); return false; }
+    if (!validUsername(username)){ toast('Username may only contain letters, numbers, dot, dash or underscore','err'); return false; }
+    if (db.users.some(x => x.id !== u?.id && (x.username||'').toLowerCase() === username)){
+      toast('Username already taken','err'); return false;
+    }
+
+    if (u){
+      const activeAdmins = db.users.filter(x => x.role === 'admin' && x.active !== false);
+      if (u.role === 'admin' && u.active !== false && (role !== 'admin' || !active) && activeAdmins.length <= 1){
+        toast('At least one active admin is required','err'); return false;
+      }
+      try {
+        await fsUpdate('users', u.id, { name, username, role, active });
+        toast('User saved','ok');
+        return true;
+      } catch(err){ toast('Save failed: '+err.message, 'err'); return false; }
+    }
+
+    const email = $('#uEmail').value.trim().toLowerCase();
+    const password = $('#uPass').value;
+    if (!validEmail(email)){ toast('Enter a valid email address','err'); return false; }
+    if (db.users.some(x => (x.email||'').toLowerCase() === email)){ toast('A user with that email already exists','err'); return false; }
+    if (!password || password.length < 6){ toast('Password must be at least 6 characters','err'); return false; }
+
+    try {
+      await createUserAccount({ email, password, name, username, role, active });
+      toast('User created','ok');
+      return true;
+    } catch(err){
+      console.error(err);
+      const map = {
+        'auth/email-already-in-use':'That email is already registered in Firebase Authentication',
+        'auth/invalid-email':'Invalid email address',
+        'auth/weak-password':'Password is too weak',
+        'auth/operation-not-allowed':'Email/Password sign-in is not enabled in Firebase'
+      };
+      toast(map[err.code] || ('Create failed: ' + (err.code || err.message)), 'err');
+      return false;
+    }
+  });
+}
+
+/* ============================================================
+   Modal
+   ============================================================ */
+function openModal(title, bodyHTML, onSave, saveLabel='Save'){
+  $('#modalTitle').textContent = title;
+  $('#modalBody').innerHTML = bodyHTML;
+  $('#modalSave').textContent = saveLabel;
+  $('#modalCancel').textContent = 'Cancel';
+  $('#modal').classList.remove('hidden');
+  $('#modalSave').disabled = false;
+  $('#modalSave').onclick = async () => {
+    $('#modalSave').disabled = true;
+    try {
+      const result = await onSave();
+      if (result !== false) closeModal();
+    } finally {
+      $('#modalSave').disabled = false;
+    }
+  };
+}
+function closeModal(){ $('#modal').classList.add('hidden'); $('#modalBody').innerHTML = ''; }
+
+/* ============================================================
+   Navigation
+   ============================================================ */
+function renderNav(){
+  const items = NAV.filter(n => !n.adminOnly || session.role === 'admin');
+  $('#navList').innerHTML = items.map(n =>
+    `<button class="nav-item" data-view="${n.id}"><span class="nav-ico">${n.icon}</span>${n.label}</button>`).join('');
+  $$('#navList .nav-item').forEach(b => b.addEventListener('click', ()=>{ navigate(b.dataset.view); closeDrawer(); }));
+}
+function navigate(view){
+  if ((view === 'reports' || view === 'settings') && session.role !== 'admin'){
+    toast('Access restricted to administrators','err'); return;
+  }
+  currentView = view;
+  $$('.view').forEach(v => v.classList.add('hidden'));
+  const el = document.getElementById('view-'+view);
+  if (el) el.classList.remove('hidden');
+  $$('#navList .nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  render(view);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function render(view){
+  updateSubChip();
+  switch(view){
+    case 'dashboard': renderDashboard(); break;
+    case 'laser': case 'uv': case 'doming': case 'other': renderJobsTable(view); break;
+    case 'money': renderMoney(); break;
+    case 'debts': renderDebts(); break;
+    case 'reports': renderReports(); break;
+    case 'settings': renderSettings(); break;
+  }
+}
+function openDrawer(){ $('#drawer').classList.add('open'); $('#overlay').classList.add('show'); }
+function closeDrawer(){ $('#drawer').classList.remove('open'); $('#overlay').classList.remove('show'); }
+
+/* ============================================================
+   Auth
+   ============================================================ */
+async function usernameToEmail(username){
+  const uname = String(username||'').trim().toLowerCase();
+  if (!uname) return null;
+  const snap = await getDocs(query(collection(fdb, 'users'), where('username', '==', uname)));
+  if (snap.empty) return null;
+  const data = snap.docs[0].data();
+  return data.email || data.gmail || null;
+}
+
+async function login(identifier, password, mode, keepSignedIn){
+  let email = String(identifier||'').trim();
+
+  if (mode === 'username'){
+    let resolved = null;
+    try { resolved = await usernameToEmail(email); }
+    catch(err){ console.error(err); toast('Could not look up that username','err'); throw err; }
+    if (!resolved){ toast('No account found for that username','err'); throw new Error('auth/user-not-found'); }
+    email = resolved;
+  }
+  email = email.toLowerCase();
+
+  try {
+    await setPersistence(auth, keepSignedIn ? browserLocalPersistence : browserSessionPersistence);
+  } catch(e){ console.warn('persistence', e); }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    return true;
+  } catch(err){
+    console.error(err);
+    const map = {
+      'auth/invalid-credential':'Invalid email/username or password',
+      'auth/invalid-login-credentials':'Invalid email/username or password',
+      'auth/wrong-password':'Incorrect password',
+      'auth/user-not-found':'No account found for that email',
+      'auth/invalid-email':'That email address is invalid',
+      'auth/too-many-requests':'Too many failed attempts — try again later',
+      'auth/user-disabled':'This account has been disabled'
+    };
+    toast(map[err.code] || 'Sign in failed', 'err');
+    throw err;
+  }
+}
+
+async function logout(){
+  try { await signOut(auth); } catch(e){}
+  session = null;
+  teardownListeners();
+  $('#paywall').classList.add('hidden');
+  showScreen('landing');
+}
+
+async function startApp(){
+  // Prefetch settings first so the subscription gate is accurate
+  try {
+    const snap = await getDoc(doc(fdb, 'settings', 'main'));
+    if (snap.exists()) db.settings = { ...defaultSettings(), ...snap.data() };
+  } catch(e){ console.warn('settings prefetch', e); }
+
+  $('#avatar').textContent = (session.name||'?').charAt(0).toUpperCase();
+  $('#userNameLabel').textContent = session.name;
+  paintBrandMarks();
+  renderNav();
+  showScreen('app');
+  setupListeners();
+
+  await ensureSubscription();
+  updateSubscriptionGate();
+  resumePendingPayments().catch(e => console.warn('resume payments', e));
+
+  navigate('dashboard');
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user){
+    session = null;
+    teardownListeners();
+    $('#paywall').classList.add('hidden');
+    showScreen('landing');
+    return;
+  }
+
+  try {
+    let data = null, docId = user.uid;
+
+    // 1) Preferred: the users doc keyed by the Firebase Auth UID
+    const uDoc = await getDoc(doc(fdb, 'users', user.uid));
+    if (uDoc.exists()){
+      data = uDoc.data();
+    } else {
+      // 2) Fallback: a users doc created manually in Firestore, matched by email
+      const email = (user.email || '').toLowerCase();
+      if (email){
+        const snap = await getDocs(query(collection(fdb, 'users'), where('email', '==', email)));
+        if (!snap.empty){
+          docId = snap.docs[0].id;
+          data = snap.docs[0].data();
+        }
+      }
+    }
+
+    if (!data){
+      await signOut(auth);
+      toast('This account has no profile in the users collection. Ask an admin to set it up.', 'err');
+      showScreen('login');
+      return;
+    }
+
+    if (data.active === false){
+      await signOut(auth);
+      toast('Your account is deactivated. Contact an administrator.', 'err');
+      showScreen('login');
+      return;
+    }
+
+    session = {
+      id: docId,
+      uid: user.uid,
+      name: data.name || user.email,
+      username: data.username || '',
+      email: data.email || user.email || '',
+      role: data.role === 'admin' ? 'admin' : 'worker'
+    };
+    await startApp();
+
+  } catch(err){
+    console.error(err);
+    toast('Failed to load your user profile', 'err');
+    showScreen('login');
+  }
+});
+
+/* ============================================================
+   Login UI helpers
+   ============================================================ */
+function setLoginMode(mode){
+  loginMode = mode;
+  $$('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  const inp = $('#loginIdentifier');
+  const txt = $('#loginIdText');
+  if (mode === 'email'){
+    inp.type = 'email'; inp.placeholder = 'you@example.com';
+    inp.autocomplete = 'email'; inp.inputMode = 'email';
+    txt.textContent = 'Email Address';
+  } else {
+    inp.type = 'text'; inp.placeholder = 'your username';
+    inp.autocomplete = 'username'; inp.inputMode = 'text';
+    txt.textContent = 'Username';
+  }
+  inp.value = '';
+  inp.focus();
+}
+
+/* ============================================================
+   Init
+   ============================================================ */
+function init(){
+  applyTheme('light');
+  paintBrandMarks();
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  $$('[data-goto]').forEach(el => el.addEventListener('click', ()=> showScreen(el.dataset.goto)));
+
+  // --- login: tabs / password toggle / forgot link ---
+  $$('#authTabs .auth-tab').forEach(t => t.addEventListener('click', ()=> setLoginMode(t.dataset.mode)));
+  setLoginMode('email');
+
+  $('#pwToggle').addEventListener('click', ()=>{
+    const i = $('#loginPassword');
+    const show = i.type === 'password';
+    i.type = show ? 'text' : 'password';
+    $('#pwToggle').textContent = show ? '🙈' : '👁';
+  });
+
+  $('#forgotBtn').addEventListener('click', async ()=>{
+    const val = $('#loginIdentifier').value.trim();
+    if (!val){ toast('Type your email or username first, then tap Forgot password','err'); return; }
+    let email = val;
+    if (loginMode === 'username'){
+      try { email = await usernameToEmail(val); }
+      catch(err){ toast('Could not look up that username','err'); return; }
+      if (!email){ toast('No account found for that username','err'); return; }
+    }
+    await sendReset(email);
+  });
+
+  $('#loginForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try {
+      await login(f.get('identifier'), f.get('password'), loginMode, $('#keepSignedIn').checked);
+    } catch(err){ /* toast already shown */ }
+    finally { btn.disabled = false; btn.textContent = 'Sign In'; }
+  });
+
+  $('#themeBtn').addEventListener('click', toggleTheme);
+  $('#menuBtn').addEventListener('click', openDrawer);
+  $('#overlay').addEventListener('click', closeDrawer);
+  $('#logoutBtn').addEventListener('click', ()=>{ if(confirm('Sign out of the system?')) logout(); });
+  $('#userChip').addEventListener('click', ()=>{
+    if (!session) return;
+    if (session.role === 'admin') navigate('settings');
+    else openAccountModal();
+  });
+
+  // --- subscription / payments ---
+  $('#payBtn').addEventListener('click', ()=> startMpesaPayment({
+    phoneInputId: 'payPhone', statusId: 'payStatus', button: $('#payBtn')
+  }));
+  $('#paywallSignOut').addEventListener('click', ()=>{
+    if (confirm('Sign out of the system?')) logout();
+  });
+  $('#subChip').addEventListener('click', openRenewModal);
+
+  $('#modalCancel').addEventListener('click', closeModal);
+  $('#modal').addEventListener('click', e=>{ if (e.target.id === 'modal') closeModal(); });
+  document.addEventListener('keydown', e=>{ if (e.key === 'Escape'){ closeModal(); closeDrawer(); } });
+
+  $$('form[data-dept]').forEach(initJobForm);
+  ['laser','uv','doming','other'].forEach(d=>{
+    const s = document.getElementById('search-'+d);
+    if (s) s.addEventListener('input', ()=> renderJobsTable(d));
+  });
+
+  $('#form-money-in').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const amt = round2(parseFloat(f.get('amount'))||0);
+    if (amt <= 0){ toast('Enter a valid amount','err'); return; }
+    try {
+      await addMoney('in', f.get('desc').trim(), amt, f.get('source'), f.get('date'));
+      e.target.reset(); e.target.date.value = todayISO();
+      toast('Money in recorded','ok');
+    } catch(err){ toast('Save failed: '+err.message, 'err'); }
+  });
+  $('#form-money-out').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const amt = round2(parseFloat(f.get('amount'))||0);
+    if (amt <= 0){ toast('Enter a valid amount','err'); return; }
+    try {
+      await addMoney('out', f.get('desc').trim(), amt, f.get('category'), f.get('date'));
+      e.target.reset(); e.target.date.value = todayISO();
+      toast('Money out recorded','ok');
+    } catch(err){ toast('Save failed: '+err.message, 'err'); }
+  });
+  $('#search-money').addEventListener('input', renderMoney);
+  $$('#moneyFilter .chip').forEach(c => c.addEventListener('click', ()=>{
+    $$('#moneyFilter .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); moneyFilter = c.dataset.f; renderMoney();
+  }));
+
+  $('#search-debts').addEventListener('input', renderDebts);
+  $('#filter-debts').addEventListener('change', renderDebts);
+  $('#addDebtBtn').addEventListener('click', ()=> openDebtModal(null));
+
+  $$('#rangeChips .chip').forEach(c => c.addEventListener('click', ()=>{
+    $$('#rangeChips .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    reportRange = c.dataset.r;
+    $('#customRange').classList.toggle('hidden', reportRange !== 'custom');
+    renderReports();
+  }));
+  $('#rangeFrom').addEventListener('change', renderReports);
+  $('#rangeTo').addEventListener('change', renderReports);
+  $('#exportCsv').addEventListener('click', exportReportCSV);
+  $('#exportPdf').addEventListener('click', exportReportPDF);
+
+  $('#form-business').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    try {
+      await fsSaveSettings({
+        businessName: f.get('businessName').trim() || 'Melah Branding',
+        phone: f.get('phone').trim(),
+        email: f.get('email').trim(),
+        currency: f.get('currency').trim() || 'KES',
+        address: f.get('address').trim()
+      });
+      toast('Business info saved','ok');
+    } catch(err){ toast('Save failed: '+err.message, 'err'); }
+  });
+  $('#form-prefs').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    try {
+      await fsSaveSettings({
+        defaultRange: f.get('defaultRange'),
+        includeCredit: f.get('includeCredit'),
+        receiptNote: f.get('receiptNote').trim()
+      });
+      toast('Preferences saved','ok');
+    } catch(err){ toast('Save failed: '+err.message, 'err'); }
+  });
+  $('#logoFile').addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 400000){ toast('Logo too large — use an image under 400KB','err'); return; }
+    const r = new FileReader();
+    r.onload = async () => {
+      try {
+        await fsSaveSettings({ logo: r.result });
+        toast('Logo updated','ok');
+      } catch(err){ toast('Save failed: '+err.message, 'err'); }
+    };
+    r.readAsDataURL(file);
+  });
+  $('#removeLogo').addEventListener('click', async ()=>{
+    try { await fsSaveSettings({ logo: null }); toast('Logo removed'); }
+    catch(err){ toast('Failed: '+err.message, 'err'); }
+  });
+  $('#addUserBtn').addEventListener('click', ()=> openUserModal(null));
+
+  $('#migrateBtn').addEventListener('click', async ()=>{
+    const raw = localStorage.getItem('melah_db_v1');
+    if (!raw){ toast('No local data found','err'); return; }
+    if (!confirm('Push all local jobs, money, debts and settings into Firestore?\n\nThis ADDS to existing cloud data.')) return;
+    try {
+      const local = JSON.parse(raw);
+      const chunks = [];
+      (local.jobs||[]).forEach(j => chunks.push(['jobs', j.id || uid(), j]));
+      (local.money||[]).forEach(m => chunks.push(['money', m.id || uid(), m]));
+      (local.debts||[]).forEach(d => chunks.push(['debts', d.id || uid(), d]));
+      for (let i=0; i<chunks.length; i+=450){
+        const batch = writeBatch(fdb);
+        chunks.slice(i, i+450).forEach(([coll, id, data]) => batch.set(doc(fdb, coll, id), data));
+        await batch.commit();
+      }
+      if (local.settings){
+        await fsSaveSettings(local.settings);
+      }
+      toast(`Migrated ${chunks.length} records`, 'ok');
+    } catch(err){
+      console.error(err);
+      toast('Migration failed: '+err.message, 'err');
+    }
+  });
+
+  $('#backupBtn').addEventListener('click', ()=>{
+    downloadBlob(new Blob([JSON.stringify(db, null, 2)], {type:'application/json'}), `melah-backup-${todayISO()}.json`);
+    toast('Backup downloaded','ok');
+  });
+
+  $('#resetBtn').addEventListener('click', async ()=>{
+    if (!confirm('This will DELETE ALL jobs, transactions, debts and settings from Firestore. Continue?')) return;
+    if (!confirm('Are you absolutely sure? This cannot be undone.')) return;
+    try {
+      await bulkDelete('jobs',  db.jobs.map(x => x.id));
+      await bulkDelete('money', db.money.map(x => x.id));
+      await bulkDelete('debts', db.debts.map(x => x.id));
+      await deleteDoc(doc(fdb, 'settings', 'main'));
+      toast('All cloud data cleared', 'ok');
+    } catch(err){ toast('Reset failed: '+err.message, 'err'); }
+  });
+
+  ['#form-money-in','#form-money-out'].forEach(sel=>{
+    const f = $(sel); if (f) f.date.value = todayISO();
+  });
+  $('#rangeFrom').value = todayISO();
+  $('#rangeTo').value = todayISO();
+
+  showScreen('landing');
+}
+
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
