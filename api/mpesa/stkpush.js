@@ -12,15 +12,34 @@ const SAF_BASE = process.env.MPESA_ENV === 'production'
   : 'https://sandbox.safaricom.co.ke';
 
 async function getToken() {
-  const auth = Buffer.from(
-    `${process.env.CONSUMER_KEY}:${process.env.CONSUMER_SECRET}`
-  ).toString('base64');
+  const key    = String(process.env.MPESA_CONSUMER_KEY || '').trim();
+  const secret = String(process.env.MPESA_CONSUMER_SECRET || '').trim();
 
-  const res = await fetch(`${SAF_BASE}/oauth/v1/generate?grant_type=client_credentials`, {
-    headers: { Authorization: `Basic ${auth}` }
-  });
-  if (!res.ok) throw new Error('OAuth failed: ' + res.status);
-  const data = await res.json();
+  if (!key || !secret) {
+    throw new Error('Missing MPESA_CONSUMER_KEY or MPESA_CONSUMER_SECRET env vars');
+  }
+
+  const auth = Buffer.from(`${key}:${secret}`).toString('base64');
+
+  const res = await fetch(
+    `${SAF_BASE}/oauth/v1/generate?grant_type=client_credentials`,
+    { headers: { Authorization: `Basic ${auth}` } }
+  );
+
+  const raw = await res.text();
+  if (!res.ok) {
+    console.error('OAuth failed', {
+      status: res.status,
+      env: process.env.MPESA_ENV || '(unset, defaults to sandbox)',
+      base: SAF_BASE,
+      safaricomResponse: raw
+    });
+    throw new Error(`OAuth ${res.status}: ${raw}`);
+  }
+
+  let data;
+  try { data = JSON.parse(raw); } catch { throw new Error('OAuth: non-JSON response: ' + raw); }
+  if (!data.access_token) throw new Error('OAuth: no access_token in response: ' + raw);
   return data.access_token;
 }
 
@@ -52,8 +71,9 @@ export default async function handler(req, res) {
     if (!phone) return res.status(400).json({ success: false, message: 'Invalid phone number' });
     if (!amount || amount <= 0) return res.status(400).json({ success: false, message: 'Invalid amount' });
 
-    const shortcode = process.env.SHORTCODE;           // till: 1816752
-    const passkey   = process.env.PASSKEY;
+    // USING YOUR ENV VAR NAMES HERE
+    const shortcode = process.env.MPESA_SHORTCODE; 
+    const passkey   = process.env.MPESA_PASSKEY;   
     const ts        = timestamp();
     const password  = Buffer.from(`${shortcode}${passkey}${ts}`).toString('base64');
 
@@ -74,7 +94,7 @@ export default async function handler(req, res) {
         BusinessShortCode: shortcode,
         Password: password,
         Timestamp: ts,
-        TransactionType: 'CustomerBuyGoodsOnline',
+        TransactionType: 'CustomerBuyGoodsOnline', // For Till / Buy Goods
         Amount: Math.round(Number(amount)),
         PartyA: phone,
         PartyB: shortcode,
@@ -87,6 +107,7 @@ export default async function handler(req, res) {
 
     const stk = await stkRes.json().catch(() => ({}));
     if (!stkRes.ok || stk.ResponseCode !== '0') {
+      console.error('STK Push failed', stk);
       return res.status(400).json({
         success: false,
         message: stk.errorMessage || stk.ResponseDescription || 'STK push failed'
@@ -109,7 +130,7 @@ export default async function handler(req, res) {
       customerMessage: stk.CustomerMessage || 'Check your phone for the M-Pesa prompt'
     });
   } catch (err) {
-    console.error('stkpush error', err);
+    console.error('stkpush handler error', err);
     return res.status(500).json({ success: false, message: err.message || 'Server error' });
   }
 }
